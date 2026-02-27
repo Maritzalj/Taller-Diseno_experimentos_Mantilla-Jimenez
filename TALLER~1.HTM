@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taller — Diseño de Experimentos (Cap. 2 y 3)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --blue-900: #1B2A4A;
+            --blue-800: #243B6A;
+            --blue-700: #2D4F8E;
+            --blue-600: #3B6CB5;
+            --blue-500: #4A85D6;
+            --blue-400: #6FA0E3;
+            --blue-300: #A3C4F0;
+            --blue-200: #D0E1F9;
+            --blue-100: #E8F0FC;
+            --blue-50: #F4F8FE;
+            --beige-900: #5C4A32;
+            --beige-700: #8B7355;
+            --beige-500: #C4A77D;
+            --beige-400: #D4BE9C;
+            --beige-300: #E5D5BE;
+            --beige-200: #F0E6D6;
+            --beige-100: #F8F3EB;
+            --beige-50: #FDFAF5;
+            --bg: #F6F3EE;
+            --surface: #FFFFFF;
+            --text: #2C2C2C;
+            --text-light: #6B6B6B;
+            --success: #3D8B5E;
+            --danger: #C0392B;
+            --warning: #D4A017;
+            --accent: #2D4F8E;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+        }
+        /* ===== HEADER ===== */
+        .site-header {
+            background: linear-gradient(135deg, var(--blue-900) 0%, var(--blue-800) 40%, var(--blue-700) 100%);
+            padding: 2.5rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .site-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+        .header-inner {
+            max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;
+            display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;
+        }
+        .header-title h1 {
+            font-family: 'DM Serif Display', serif;
+            color: #fff; font-size: 1.6rem; font-weight: 400; letter-spacing: -0.02em;
+        }
+        .header-title p {
+            color: var(--beige-400); font-size: 0.78rem;
+            font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.3rem;
+        }
+        .header-badge {
+            background: rgba(255,255,255,0.12); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1.2rem; border-radius: 2rem;
+            color: var(--beige-300); font-size: 0.78rem; font-weight: 500;
+        }
+        /* ===== TABS ===== */
+        .section-tabs {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; gap: 0; padding: 0 1rem;
+            position: sticky; top: 0; z-index: 90;
+            background: var(--bg);
+            border-bottom: 2px solid var(--beige-300);
+        }
+        .section-tab {
+            padding: 1rem 1.5rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem; font-weight: 600;
+            color: var(--text-light);
+            border: none; background: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .section-tab:hover { color: var(--blue-700); }
+        .section-tab.active { color: var(--blue-800); border-bottom-color: var(--blue-600); }
+        /* ===== LAYOUT ===== */
+        .main-container {
+            max-width: 1100px; margin: 0 auto;
+            display: flex; gap: 1.5rem;
+            padding: 1.5rem 1rem;
+        }
+        .sidebar {
+            width: 240px; flex-shrink: 0;
+            position: sticky; top: 60px;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+        }
+        .sidebar::-webkit-scrollbar { width: 3px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--blue-400); border-radius: 3px; }
+        .sidebar-group { margin-bottom: 1.25rem; }
+        .sidebar-group-title {
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--beige-700); padding: 0.4rem 0.6rem;
+        }
+        .sidebar-item {
+            display: block; width: 100%; text-align: left; border: none; background: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.76rem; font-weight: 500;
+            color: var(--text-light); padding: 0.45rem 0.6rem;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s; line-height: 1.4;
+        }
+        .sidebar-item:hover { background: var(--blue-100); color: var(--blue-700); }
+        .sidebar-item.active {
+            background: var(--blue-100); color: var(--blue-800); font-weight: 600;
+            border-left: 3px solid var(--blue-600);
+        }
+        /* ===== CONTENT ===== */
+        .content-area { flex: 1; min-width: 0; }
+        .section-panel { display: none; }
+        .section-panel.active { display: block; }
+        /* ===== CARDS ===== */
+        .exercise-card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(27,42,74,0.06), 0 4px 16px rgba(27,42,74,0.04);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            border: 1px solid var(--beige-300);
+            transition: box-shadow 0.3s;
+        }
+        .exercise-card:hover { box-shadow: 0 4px 20px rgba(27,42,74,0.1); }
+        .exercise-header {
+            padding: 1rem 1.25rem; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background 0.2s;
+        }
+        .exercise-header:hover { background: var(--blue-50); }
+        .exercise-header h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1rem; font-weight: 400; color: var(--blue-800);
+            margin: 0; line-height: 1.3;
+        }
+        .exercise-header .subtitle {
+            font-size: 0.75rem; color: var(--text-light); font-weight: 400; margin-top: 0.15rem;
+        }
+        .toggle-arrow {
+            font-size: 1.1rem; color: var(--blue-400);
+            transition: transform 0.3s; flex-shrink: 0; margin-left: 0.75rem;
+        }
+        .exercise-card.open .toggle-arrow { transform: rotate(180deg); }
+        .exercise-body { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; }
+        .exercise-card.open .exercise-body { max-height: 120000px; }
+        .exercise-content { padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--beige-200); }
+        /* ===== TYPOGRAPHY ===== */
+        .exercise-content h4 {
+            font-family: 'DM Serif Display', serif;
+            color: var(--blue-800); font-size: 1rem; font-weight: 400;
+            margin: 1.25rem 0 0.6rem; padding-bottom: 0.4rem;
+            border-bottom: 2px solid var(--beige-400);
+        }
+        .exercise-content h5 {
+            color: var(--blue-700); font-size: 0.88rem; font-weight: 600;
+            margin: 1.1rem 0 0.4rem;
+        }
+        .exercise-content p {
+            margin-bottom: 0.6rem; text-align: justify;
+            font-size: 0.88rem; line-height: 1.8;
+        }
+        /* ENUNCIADO */
+        .enunciado {
+            background: linear-gradient(135deg, var(--blue-50), var(--beige-50));
+            border-left: 4px solid var(--blue-600);
+            border-radius: 0 8px 8px 0;
+            padding: 0.9rem 1.1rem; margin: 0.6rem 0 1rem;
+            font-size: 0.86rem; line-height: 1.7;
+        }
+        .enunciado strong { color: var(--blue-800); }
+        /* FORMULA */
+        .formula-box {
+            background: linear-gradient(135deg, var(--blue-50) 0%, var(--beige-50) 100%);
+            padding: 0.85rem 1.1rem; border-radius: 8px;
+            margin: 0.6rem 0; overflow-x: auto;
+            border: 1px solid var(--beige-300);
+        }
+        /* DECISION */
+        .decision-box {
+            padding: 0.7rem 1rem; border-radius: 8px;
+            margin: 0.6rem 0; font-weight: 600; font-size: 0.85rem;
+        }
+        .decision-box.reject {
+            background: rgba(192,57,43,0.07);
+            border-left: 4px solid var(--danger); color: #922B21;
+        }
+        .decision-box.no-reject {
+            background: rgba(61,139,94,0.07);
+            border-left: 4px solid var(--success); color: #1E6F42;
+        }
+        .decision-box.info {
+            background: var(--blue-50);
+            border-left: 4px solid var(--blue-600); color: var(--blue-800);
+        }
+        .decision-box.correct {
+            background: rgba(61,139,94,0.07);
+            border-left: 4px solid var(--success); color: #1E6F42;
+        }
+        /* TABLES */
+        .data-table {
+            width: 100%; border-collapse: collapse;
+            margin: 0.75rem 0; font-size: 0.82rem;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 1px 6px rgba(27,42,74,0.06);
+        }
+        .data-table th {
+            background: linear-gradient(135deg, var(--blue-800), var(--blue-700));
+            color: #fff; font-weight: 600; padding: 0.6rem 0.65rem;
+            text-align: center; font-size: 0.78rem;
+        }
+        .data-table td {
+            padding: 0.5rem 0.65rem; text-align: center;
+            border-bottom: 1px solid var(--beige-200);
+        }
+        .data-table tr:nth-child(even) { background: var(--beige-50); }
+        .data-table tr:hover { background: var(--blue-50); }
+        .data-table .highlight { font-weight: 700; color: var(--blue-800); }
+        .data-table .yes { color: var(--success); font-weight: 700; }
+        .data-table .no { color: var(--danger); font-weight: 700; }
+        /* CONCLUSION */
+        .conclusion-box {
+            background: linear-gradient(135deg, var(--beige-100), var(--beige-50));
+            border-left: 4px solid var(--beige-500);
+            border-radius: 0 8px 8px 0;
+            padding: 0.85rem 1.1rem; margin: 0.75rem 0;
+            font-size: 0.86rem; line-height: 1.7;
+        }
+        .conclusion-box strong { color: var(--beige-900); }
+        /* STEP */
+        .step-label {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--blue-700), var(--blue-600));
+            color: #fff; font-weight: 700; font-size: 0.68rem;
+            padding: 0.15rem 0.6rem; border-radius: 1rem;
+            margin-right: 0.4rem; text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .proof-step {
+            background: var(--blue-50);
+            border-radius: 8px; padding: 0.85rem 1.1rem;
+            margin: 0.6rem 0;
+            border-left: 3px solid var(--blue-400);
+        }
+        .proof-step .step-title {
+            font-weight: 700; font-size: 0.83rem;
+            color: var(--blue-800); margin-bottom: 0.4rem;
+        }
+        /* PROCEDURE */
+        .procedure-box {
+            background: var(--beige-50);
+            border: 1px solid var(--beige-300);
+            border-radius: 8px; padding: 0.85rem 1.1rem;
+            margin: 0.6rem 0;
+        }
+        .procedure-box .proc-title {
+            font-weight: 700; font-size: 0.82rem; color: var(--beige-900);
+            margin-bottom: 0.35rem;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .interpretation-box {
+            background: linear-gradient(135deg, rgba(45,79,142,0.04), rgba(196,167,125,0.06));
+            border: 1px dashed var(--blue-300);
+            border-radius: 8px; padding: 0.85rem 1.1rem;
+            margin: 0.6rem 0;
+        }
+        .interpretation-box .interp-title {
+            font-weight: 700; font-size: 0.82rem; color: var(--blue-700);
+            margin-bottom: 0.35rem;
+        }
+        /* CHART */
+        .chart-container {
+            background: var(--surface);
+            border-radius: 8px; padding: 0.75rem;
+            margin: 0.75rem 0;
+            border: 1px solid var(--beige-300);
+            position: relative;
+            height: 300px;
+        }
+        .chart-row {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+        }
+        .chart-row .chart-container { flex: 1; min-width: 280px; }
+        /* FOOTER */
+        .site-footer {
+            background: linear-gradient(135deg, var(--blue-900), var(--blue-800));
+            padding: 2rem; margin-top: 2.5rem;
+        }
+        .footer-inner { max-width: 1100px; margin: 0 auto; text-align: center; }
+        .footer-inner h3 {
+            font-family: 'DM Serif Display', serif;
+            color: #fff; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 400;
+        }
+        .footer-inner p { color: rgba(255,255,255,0.55); font-size: 0.78rem; margin: 0.25rem 0; }
+        .footer-inner .names { color: var(--beige-400); font-weight: 600; font-size: 0.88rem; }
+        /* SCROLL TOP */
+        .scroll-top {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            width: 2.75rem; height: 2.75rem;
+            background: var(--blue-700); color: #fff; border: none; border-radius: 50%;
+            font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 3px 12px rgba(27,42,74,0.3);
+            display: none; align-items: center; justify-content: center;
+            transition: all 0.3s; z-index: 80;
+        }
+        .scroll-top.visible { display: flex; }
+        .scroll-top:hover { transform: translateY(-2px); background: var(--blue-600); }
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main-container { padding: 1rem; }
+            .section-tabs { overflow-x: auto; }
+            .section-tab { padding: 0.7rem 0.9rem; font-size: 0.76rem; }
+            .chart-row { flex-direction: column; }
+        }
+        /* KATEX */
+        .katex-display { margin: 0.6em 0; overflow-x: auto; }
+        .katex { font-size: 1em; }
+        /* CODE */
+        pre {
+            background: var(--blue-900); color: #C8D6E5;
+            padding: 0.85rem; border-radius: 8px;
+            overflow-x: auto; margin: 0.6rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem; line-height: 1.6;
+        }
+        /* ANIMATION */
+        .fade-in { animation: fadeIn 0.35s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-title">
+            <h1>Taller — Diseño de Experimentos</h1>
+            <p>Montgomery · Capítulos 2 y 3 · Universidad Santo Tomás</p>
+        </div>
+        <div class="header-badge">Camila Mantilla · Maritza Jiménez</div>
+    </div>
+</header>
+
+<nav class="section-tabs" id="sectionTabs">
+    <button class="section-tab active" data-section="demos">Demostraciones</button>
+    <button class="section-tab" data-section="cap2">Capítulo 2</button>
+    <button class="section-tab" data-section="cap3">Capítulo 3</button>
+</nav>
+
+<div class="main-container">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="content-area" id="contentArea">
+
+        <!-- ========== DEMOSTRACIONES ========== -->
+        <div class="section-panel active" id="panel-demos">
+
+            <div class="exercise-card open" id="demo-1">
+                <div class="exercise-header" onclick="toggleCard(this)">
+                    <div><h3>Demostración 1</h3><div class="subtitle">$\hat{\tau}_i = \bar{y}_{i\cdot} - \bar{y}_{\cdot\cdot}$</div></div>
+                    <span class="toggle-arrow">▾</span>
+                </div>
+                <div class="exercise-body"><div class="exercise-content">
+                    <h4>Demostrar que $\hat{\tau}_i = \bar{y}_{i\cdot} - \bar{y}_{\cdot\cdot}$</h4>
+                    <div class="enunciado"><strong>Objetivo:</strong> Mostrar que el estimador de mínimos cuadrados del efecto del tratamiento $i$ es la diferencia entre la media del tratamiento y la gran media.</div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 1</span> Modelo lineal de efectos fijos</div>
+                        <p>El modelo para un DCA de un factor es:</p>
+                        <div class="formula-box">$$y_{ij} = \mu + \tau_i + \varepsilon_{ij}, \quad i=1,\ldots,a, \quad j=1,\ldots,n$$</div>
+                        <p>donde $\mu$ es la media global, $\tau_i$ es el efecto del tratamiento $i$ y $\varepsilon_{ij} \sim N(0,\sigma^2)$ son errores iid.</p>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 2</span> Restricción de identificabilidad</div>
+                        <p>Para que el modelo sea identificable (evitar infinitas soluciones), se impone la restricción:</p>
+                        <div class="formula-box">$$\sum_{i=1}^{a}\tau_i = 0$$</div>
+                        <p>Esto implica que los efectos de los tratamientos suman cero, es decir, se miden como desviaciones de la media global.</p>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 3</span> Función de mínimos cuadrados</div>
+                        <p>Minimizamos la suma de cuadrados del error:</p>
+                        <div class="formula-box">$$S(\mu,\tau_1,\ldots,\tau_a) = \sum_{i=1}^{a}\sum_{j=1}^{n}(y_{ij}-\mu-\tau_i)^2$$</div>
+                        <p>Derivando respecto a $\mu$ y $\tau_i$ e igualando a cero:</p>
+                        <div class="formula-box">$$\frac{\partial S}{\partial \mu}\bigg|_{\hat{\mu},\hat{\tau}_i} = -2\sum_i\sum_j(y_{ij}-\hat{\mu}-\hat{\tau}_i) = 0$$</div>
+                        <div class="formula-box">$$\frac{\partial S}{\partial \tau_i}\bigg|_{\hat{\mu},\hat{\tau}_i} = -2\sum_j(y_{ij}-\hat{\mu}-\hat{\tau}_i) = 0 \quad \forall\, i$$</div>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 4</span> Ecuaciones normales y solución</div>
+                        <p>De la primera ecuación normal:</p>
+                        <div class="formula-box">$$y_{\cdot\cdot} = N\hat{\mu} + n\sum_i\hat{\tau}_i = N\hat{\mu} \quad \Rightarrow \quad \hat{\mu} = \bar{y}_{\cdot\cdot}$$</div>
+                        <p>De la segunda ecuación normal:</p>
+                        <div class="formula-box">$$y_{i\cdot} = n\hat{\mu} + n\hat{\tau}_i \quad \Rightarrow \quad \hat{\tau}_i = \frac{y_{i\cdot}}{n} - \hat{\mu} = \bar{y}_{i\cdot} - \bar{y}_{\cdot\cdot}$$</div>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 5</span> Verificación de insesgamiento</div>
+                        <div class="formula-box">$$E(\hat{\tau}_i) = E(\bar{y}_{i\cdot} - \bar{y}_{\cdot\cdot}) = (\mu+\tau_i) - \mu = \tau_i \quad \checkmark$$</div>
+                        <div class="formula-box">$$\boxed{\hat{\tau}_i = \bar{y}_{i\cdot} - \bar{y}_{\cdot\cdot}} \quad \blacksquare$$</div>
+                    </div>
+
+                    <div class="interpretation-box">
+                        <div class="interp-title">📖 Interpretación</div>
+                        <p>El efecto estimado del tratamiento $i$ se mide como la desviación de la media del grupo $i$ respecto a la gran media. Si $\hat{\tau}_i > 0$, el tratamiento produce valores superiores al promedio global; si $\hat{\tau}_i < 0$, produce valores inferiores. Este estimador es insesgado y es la base para la descomposición de la variabilidad en el ANOVA.</p>
+                    </div>
+                </div></div>
+            </div>
+
+            <div class="exercise-card" id="demo-2">
+                <div class="exercise-header" onclick="toggleCard(this)">
+                    <div><h3>Demostración 2</h3><div class="subtitle">$\hat{\sigma}^2 = \frac{1}{N}\sum_i\sum_j(y_{ij}-\bar{y}_{i\cdot})^2 = \frac{1}{N}\sum_i n_i S_i^2$</div></div>
+                    <span class="toggle-arrow">▾</span>
+                </div>
+                <div class="exercise-body"><div class="exercise-content">
+                    <h4>Demostrar que $\hat{\sigma}^2 = \frac{1}{N}\sum_{i=1}^{I}\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i\cdot})^2 = \frac{1}{N}\sum_{i=1}^{I}n_i S_i^2$</h4>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 1</span> Definición de la varianza muestral del grupo $i$</div>
+                        <p>La varianza muestral (con divisor $n_i$, no $n_i-1$, para MLE) del grupo $i$ es:</p>
+                        <div class="formula-box">$$S_i^2 = \frac{1}{n_i}\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i\cdot})^2 \quad \Rightarrow \quad n_i S_i^2 = \sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i\cdot})^2$$</div>
+                        <p>Esto es simplemente la suma de cuadrados de las desviaciones dentro del grupo $i$.</p>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 2</span> Suma total de cuadrados dentro de grupos</div>
+                        <p>Sumando sobre los $I$ grupos:</p>
+                        <div class="formula-box">$$\sum_{i=1}^{I}\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i\cdot})^2 = \sum_{i=1}^{I}n_i S_i^2 = SS_E$$</div>
+                        <p>Esto es la suma de cuadrados del error (SSE) en el ANOVA, que mide la variabilidad <em>dentro</em> de los tratamientos.</p>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 3</span> Estimador MLE de $\sigma^2$</div>
+                        <p>El estimador de máxima verosimilitud (MLE) de $\sigma^2$ divide entre $N$ (no entre $N-a$):</p>
+                        <div class="formula-box">$$\boxed{\hat{\sigma}^2_{MLE} = \frac{SS_E}{N} = \frac{1}{N}\sum_{i=1}^{I}\sum_{j=1}^{n_i}(y_{ij}-\bar{y}_{i\cdot})^2 = \frac{1}{N}\sum_{i=1}^{I}n_i S_i^2} \quad \blacksquare$$</div>
+                    </div>
+
+                    <div class="interpretation-box">
+                        <div class="interp-title">📖 Nota sobre sesgo</div>
+                        <p>El MLE $\hat{\sigma}^2 = SS_E/N$ es sesgado. El estimador insesgado es $CME = SS_E/(N-a)$. Montgomery usa $CME$ como estimador preferido porque $E[CME]=\sigma^2$, mientras que $E[\hat{\sigma}^2_{MLE}] = \sigma^2(N-a)/N < \sigma^2$. Ambos son consistentes.</p>
+                    </div>
+                </div></div>
+            </div>
+
+            <div class="exercise-card" id="demo-3">
+                <div class="exercise-header" onclick="toggleCard(this)">
+                    <div><h3>Demostración 3</h3><div class="subtitle">$E[S^2_{Tr}] = \sigma^2 + \frac{\sum n_i\tau_i^2}{I-1}$</div></div>
+                    <span class="toggle-arrow">▾</span>
+                </div>
+                <div class="exercise-body"><div class="exercise-content">
+                    <h4>Demostrar que $E\left[S^2_{Tr}\right] = \sigma^2 + \dfrac{\sum_{i=1}^{I}n_i\tau_i^2}{I-1}$</h4>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 1</span> Definiciones</div>
+                        <div class="formula-box">$$SS_{Tr} = \sum_{i=1}^{I}n_i(\bar{y}_{i\cdot}-\bar{y}_{\cdot\cdot})^2, \qquad S^2_{Tr} = MS_{Tr} = \frac{SS_{Tr}}{I-1}$$</div>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 2</span> Descomposición algebraica de $SS_{Tr}$</div>
+                        <p>Sumamos y restamos $(\mu+\tau_i)$ y $\mu$:</p>
+                        <div class="formula-box">$$\bar{y}_{i\cdot}-\bar{y}_{\cdot\cdot} = (\bar{y}_{i\cdot}-\mu-\tau_i) - (\bar{y}_{\cdot\cdot}-\mu) + \tau_i$$</div>
+                        <p>Elevando al cuadrado, multiplicando por $n_i$ y sumando:</p>
+                        <div class="formula-box">$$SS_{Tr} = \sum_i n_i(\bar{y}_{i\cdot}-\mu-\tau_i)^2 + N(\bar{y}_{\cdot\cdot}-\mu)^2 + \sum_i n_i\tau_i^2 - 2N(\bar{y}_{\cdot\cdot}-\mu)^2$$</div>
+                        <p>(usando $\sum n_i\tau_i(\bar{y}_{i\cdot}-\mu-\tau_i)=0$ en esperanza y $\sum n_i\tau_i = 0$)</p>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 3</span> Esperanzas de los términos</div>
+                        <p>Usando $E(\bar{y}_{i\cdot})=\mu+\tau_i$ y $\text{Var}(\bar{y}_{i\cdot})=\sigma^2/n_i$:</p>
+                        <div class="formula-box">$$E[n_i(\bar{y}_{i\cdot}-\mu-\tau_i)^2] = n_i\cdot\frac{\sigma^2}{n_i} = \sigma^2$$</div>
+                        <div class="formula-box">$$E[N(\bar{y}_{\cdot\cdot}-\mu)^2] = \sigma^2 \quad \text{(ya que } \text{Var}(\bar{y}_{\cdot\cdot})=\sigma^2/N\text{)}$$</div>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 4</span> Esperanza de $SS_{Tr}$</div>
+                        <div class="formula-box">$$E[SS_{Tr}] = I\sigma^2 - \sigma^2 + \sum_i n_i\tau_i^2 = (I-1)\sigma^2 + \sum_{i=1}^{I}n_i\tau_i^2$$</div>
+                    </div>
+
+                    <div class="proof-step">
+                        <div class="step-title"><span class="step-label">Paso 5</span> Resultado final</div>
+                        <div class="formula-box">$$\boxed{E\left[S^2_{Tr}\right] = E\left[\frac{SS_{Tr}}{I-1}\right] = \sigma^2 + \frac{\sum_{i=1}^{I}n_i\tau_i^2}{I-1}} \quad \blacksquare$$</div>
+                    </div>
+
+                    <div class="interpretation-box">
+                        <div class="interp-title">📖 Interpretación fundamental para ANOVA</div>
+                        <p>Este resultado es la <strong>justificación teórica del estadístico F</strong>. Si $H_0:\tau_i=0\;\forall i$ es verdadera, entonces $E[MS_{Tr}]=\sigma^2 = E[CME]$, y la razón $F_0 = MS_{Tr}/CME$ debería estar cercana a 1. Cuando los tratamientos tienen efectos reales ($\tau_i\neq 0$), $E[MS_{Tr}]>\sigma^2$, lo que infla $F_0$ y lleva al rechazo de $H_0$. Esta asimetría es lo que hace de la prueba F una prueba unilateral derecha.</p>
+                    </div>
+                </div></div>
+            </div>
+        </div>
+
+        <!-- ========== CAP 2 ========== -->
+        <div class="section-panel" id="panel-cap2"></div>
+
+        <!-- ========== CAP 3 ========== -->
+        <div class="section-panel" id="panel-cap3"></div>
+
+    </div>
+</div>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <h3>Referencias Bibliográficas</h3>
+        <p>Montgomery, D. C. (2017). <em style="color:var(--beige-400)">Design and Analysis of Experiments</em> (9th ed.). John Wiley & Sons.</p>
+        <br>
+        <p class="names">Camila Mantilla · Maritza Jiménez</p>
+        <p>Diseño de Experimentos · Universidad Santo Tomás · 2026</p>
+    </div>
+</footer>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ============================
+// EXERCISE DATA — CHAPTER 2
+// ============================
+const cap2Exercises = [
+{
+    id:"2.5", title:"Ejercicio 2.5", subtitle:"Prueba Z de una muestra — Completar salida", topic:"Prueba Z",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Se tiene una prueba Z de una muestra con $H_0:\\mu=30$ vs $H_1:\\mu\\neq 30$. Se sabe que $\\sigma=1.2$ (conocida), $n=16$, $\\bar{y}=31.2$, $SE=0.3$. Completar $Z_0$ y el valor-p.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Identificación de datos y planteamiento</div>
+        <p>Dado: $n=16$, $\\bar{y}=31.2$, $\\mu_0=30$, $\\sigma=1.2$ (conocida). Es una prueba Z bilateral porque $H_1:\\mu\\neq 30$.</p>
+        <p>Modelo: $\\bar{y}\\sim N\\left(\\mu,\\frac{\\sigma^2}{n}\\right)$. Bajo $H_0$: $Z_0 = \\frac{\\bar{y}-\\mu_0}{\\sigma/\\sqrt{n}} \\sim N(0,1)$.</p>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — Cálculo del error estándar</div>
+        <div class="formula-box">$$SE = \\frac{\\sigma}{\\sqrt{n}} = \\frac{1.2}{\\sqrt{16}} = \\frac{1.2}{4} = 0.3 \\quad \\checkmark$$</div>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 3 — Cálculo del estadístico Z₀</div>
+        <div class="formula-box">$$Z_0 = \\frac{\\bar{y}-\\mu_0}{SE} = \\frac{31.2-30}{0.3} = \\frac{1.2}{0.3} = 4.00$$</div>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 4 — Cálculo del valor-p (dos colas)</div>
+        <div class="formula-box">$$p = 2\\times P(Z>4.00) = 2\\times[1-\\Phi(4.00)] = 2\\times 0.00003 \\approx 0.0001$$</div>
+    </div>
+
+    <h5>Tabla resumen</h5>
+    <table class="data-table">
+        <tr><th>Parámetro</th><th>Valor</th><th>Fórmula / Nota</th></tr>
+        <tr><td>$n$</td><td class="highlight">16</td><td>Dato</td></tr>
+        <tr><td>$\\bar{y}$</td><td class="highlight">31.2</td><td>Media muestral</td></tr>
+        <tr><td>$\\mu_0$</td><td>30</td><td>Hipótesis nula</td></tr>
+        <tr><td>$\\sigma$</td><td>1.2</td><td>Conocida</td></tr>
+        <tr><td>$SE$</td><td class="highlight">0.3</td><td>$\\sigma/\\sqrt{n}$</td></tr>
+        <tr><td>$Z_0$</td><td class="highlight">4.00</td><td>$(\\bar{y}-\\mu_0)/SE$</td></tr>
+        <tr><td>Valor-p</td><td class="highlight">0.0001</td><td>$2P(Z>4)$</td></tr>
+    </table>
+
+    <div class="decision-box reject">Decisión: $p=0.0001 < \\alpha=0.05$. Se RECHAZA $H_0$. Hay evidencia altamente significativa de que $\\mu\\neq 30$.</div>
+
+    <h5>Inciso (b): ¿Una o dos colas?</h5>
+    <div class="decision-box info">Prueba de <strong>DOS COLAS</strong>, dado que $H_1:\\mu\\neq 30$ (se busca cualquier desviación, no solo en una dirección).</div>
+
+    <h5>Inciso (c): IC del 99%</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculo del intervalo</div>
+        <div class="formula-box">$$IC_{99\\%} = \\bar{y}\\pm Z_{0.005}\\times SE = 31.2\\pm 2.576\\times 0.3 = 31.2\\pm 0.773$$</div>
+        <div class="formula-box">$$\\boxed{IC_{99\\%} = [30.427,\\; 31.973]}$$</div>
+        <p>El IC al 99% NO contiene $\\mu_0=30$, lo que es consistente con el rechazo de $H_0$.</p>
+    </div>
+
+    <h5>Inciso (d): Valor-p si $H_1:\\mu>30$</h5>
+    <div class="formula-box">$$p_{\\text{una cola}} = P(Z>4.00) = \\frac{0.0001}{2} \\approx 0.00003$$</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación global</div>
+        <p>La evidencia es contundente: la media poblacional difiere significativamente de 30. Con $Z_0=4$, estamos a 4 desviaciones estándar del valor hipotético, lo cual es extremadamente improbable bajo $H_0$. El IC al 99% confirma que incluso con 99% de confianza, el valor 30 queda excluido.</p>
+    </div>
+    `
+},
+{
+    id:"2.10", title:"Ejercicio 2.10", subtitle:"Prueba t de dos muestras — SE faltante", topic:"Prueba t",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Salida de computadora: diferencia de medias = 11.5, $gl=24$, $t_0=-1.88$, valor-p = 0.0723. Encontrar el SE faltante y completar el análisis.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Relación entre $t_0$ y SE</div>
+        <p>De la fórmula: $t_0 = \\frac{\\bar{y}_1-\\bar{y}_2}{SE}$, despejamos:</p>
+        <div class="formula-box">$$SE = \\frac{|\\bar{y}_1-\\bar{y}_2|}{|t_0|} = \\frac{11.5}{1.88} = 6.117$$</div>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — Verificación del valor-p</div>
+        <p>Con $t_0 = -1.88$ y $gl = 24$: $p = 2\\times P(T_{24}>1.88)$. Usando tabla $t$: $P(T_{24}>1.88)\\approx 0.0362$, entonces $p\\approx 0.0723$. ✓ Coincide con la salida.</p>
+    </div>
+
+    <h5>Inciso (b): ¿Una o dos colas?</h5>
+    <div class="decision-box info">Prueba de <strong>DOS COLAS</strong>. El valor-p = 0.0723 = $2\\times P(T>1.88)$ con 24 gl. Si fuera una cola, $p\\approx 0.036$.</div>
+
+    <h5>Inciso (c): Conclusión con $\\alpha = 0.05$</h5>
+    <div class="decision-box no-reject">$p = 0.0723 > \\alpha = 0.05$. No se rechaza $H_0$. No hay evidencia suficiente de diferencia significativa entre las medias poblacionales.</div>
+
+    <h5>Inciso (d): IC 95%</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculo</div>
+        <div class="formula-box">$$IC_{95\\%} = (\\bar{y}_1-\\bar{y}_2)\\pm t_{0.025,24}\\times SE = 11.5\\pm 2.064\\times 6.117$$</div>
+        <div class="formula-box">$$\\boxed{IC_{95\\%} = [-1.13,\\; 24.13]}$$</div>
+        <p>El IC incluye 0, confirmando la no-significancia: no podemos descartar que las medias sean iguales.</p>
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Aunque la diferencia observada de 11.5 unidades parece grande, la alta variabilidad (SE=6.117) hace que esta diferencia no sea estadísticamente significativa a nivel 0.05. El IC amplio $[-1.13, 24.13]$ refleja alta incertidumbre. Se recomendaría aumentar el tamaño de muestra para reducir el error estándar y obtener mayor potencia.</p>
+    </div>
+    `
+},
+{
+    id:"2.15", title:"Ejercicio 2.15", subtitle:"Prueba t de una muestra — Completar salida", topic:"Prueba t",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Salida: $n=25$, $\\bar{y}=92.5805$, $SE=0.4673$, $t_0=3.38$, $p=0.002$, $H_0:\\mu=91$. Completar $S$ y el límite superior del IC 95%.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Desviación estándar muestral</div>
+        <div class="formula-box">$$SE = \\frac{S}{\\sqrt{n}} \\quad\\Rightarrow\\quad S = SE\\times\\sqrt{n} = 0.4673\\times\\sqrt{25} = 0.4673\\times 5 = 2.3365$$</div>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — Límite superior del IC 95%</div>
+        <p>Con $gl = 24$ y $t_{0.025,24} = 2.064$:</p>
+        <div class="formula-box">$$IC_{95\\%} = \\bar{y}\\pm t\\times SE = 92.5805\\pm 2.064\\times 0.4673 = [91.616,\\; 93.545]$$</div>
+        <p>El límite inferior 91.616 ya estaba dado; el superior faltante es <strong>93.545</strong>.</p>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 3 — Verificación del estadístico</div>
+        <div class="formula-box">$$t_0 = \\frac{\\bar{y}-\\mu_0}{SE} = \\frac{92.5805-91}{0.4673} = \\frac{1.5805}{0.4673} = 3.38 \\quad \\checkmark$$</div>
+    </div>
+
+    <div class="decision-box reject">$p=0.002 < 0.05$. Se RECHAZA $H_0$. La media es significativamente diferente de 91.</div>
+
+    <h5>Inciso (c): Si $H_0:\\mu=90$</h5>
+    <div class="formula-box">$$t_0 = \\frac{92.5805-90}{0.4673} = 5.52 \\quad\\Rightarrow\\quad p < 0.0001$$</div>
+    <div class="decision-box reject">Se rechaza $H_0:\\mu=90$ con evidencia aún más fuerte.</div>
+
+    <h5>Inciso (d): IC 99%</h5>
+    <div class="formula-box">$$IC_{99\\%} = 92.5805\\pm 2.797\\times 0.4673 = [91.273,\\; 93.888]$$</div>
+
+    <h5>Inciso (e): Valor-p si $H_1:\\mu>91$</h5>
+    <div class="formula-box">$$p_{\\text{una cola}} = P(T_{24}>3.38) = 0.002/2 = 0.001$$</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>La media muestral de 92.58 está significativamente por encima de 91. El IC 95% $[91.62, 93.55]$ excluye 91, confirmando el rechazo. El IC 99% más amplio aún excluye 90, pero incluye 91 por muy poco, lo que muestra la importancia del nivel de confianza elegido.</p>
+    </div>
+    `
+},
+{
+    id:"2.20", title:"Ejercicio 2.20", subtitle:"Prueba Z — Diámetros de ejes de acero", topic:"Prueba Z",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Diámetro nominal: $\\mu_0=0.255$ in, $\\sigma=0.0001$ in (conocida), $n=10$, $\\bar{y}=0.2545$ in.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Inciso (a): Hipótesis</h5>
+    <div class="formula-box">$$H_0: \\mu = 0.255 \\quad vs \\quad H_1: \\mu \\neq 0.255$$</div>
+    <p>Se usa prueba Z bilateral porque $\\sigma$ es conocida y se busca cualquier desviación del diámetro nominal.</p>
+
+    <h5>Inciso (b): Prueba Z ($\\alpha=0.05$)</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculos paso a paso</div>
+        <div class="formula-box">$$SE = \\frac{\\sigma}{\\sqrt{n}} = \\frac{0.0001}{\\sqrt{10}} = 3.162\\times 10^{-5}$$</div>
+        <div class="formula-box">$$Z_0 = \\frac{0.2545-0.255}{3.162\\times 10^{-5}} = \\frac{-0.0005}{3.162\\times 10^{-5}} = -15.81$$</div>
+    </div>
+    <table class="data-table">
+        <tr><th>Cálculo</th><th>Valor</th></tr>
+        <tr><td>$SE = \\sigma/\\sqrt{n}$</td><td>$3.162\\times 10^{-5}$</td></tr>
+        <tr><td>$Z_0$</td><td class="highlight">$-15.81$</td></tr>
+        <tr><td>$Z_{\\text{crit}}$ (bilateral)</td><td>$\\pm 1.96$</td></tr>
+    </table>
+    <div class="decision-box reject">$|Z_0|=15.81 \\gg 1.96$. Se RECHAZA $H_0$. El proceso NO produce el diámetro nominal.</div>
+
+    <h5>Inciso (c): Valor-p</h5>
+    <div class="formula-box">$$p = 2\\times P(Z>15.81) \\approx 0 \\quad \\text{(prácticamente cero)}$$</div>
+
+    <h5>Inciso (d): IC 95%</h5>
+    <div class="formula-box">$$IC_{95\\%} = 0.2545\\pm 1.96\\times 3.162\\times 10^{-5} = [0.25444,\\; 0.25456]$$</div>
+    <p>El IC NO incluye 0.255, confirmando el rechazo.</p>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>El resultado es contundente: el proceso produce ejes con diámetro medio de 0.2545 in, que difiere del nominal de 0.255 in en 0.0005 in. Aunque parece una diferencia pequeña en valor absoluto, la variabilidad del proceso es tan baja ($\\sigma=0.0001$) que esta diferencia equivale a 15.8 desviaciones estándar. El proceso necesita recalibración urgente.</p>
+    </div>
+    `
+},
+{
+    id:"2.25", title:"Ejercicio 2.25", subtitle:"¿Distribución normal para tiempos de reparación?", topic:"Normalidad",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Tiempos de reparación (horas) de 16 instrumentos: 159, 224, 222, 149, 280, 379, 362, 260, 101, 179, 168, 485, 212, 264, 250, 170. ¿Distribución normal?</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Estadísticos descriptivos</div>
+        <p>Ordenando los datos: 101, 149, 159, 168, 170, 179, 212, 222, 224, 250, 260, 264, 280, 362, 379, 485</p>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Estadístico</th><th>Valor</th><th>Fórmula / Interpretación</th></tr>
+        <tr><td>$n$</td><td>16</td><td>Tamaño de muestra</td></tr>
+        <tr><td>$\\bar{y}$</td><td>241.5</td><td>$\\sum y_i / n$</td></tr>
+        <tr><td>Mediana</td><td>223.0</td><td>$(y_{(8)}+y_{(9)})/2 = (222+224)/2$</td></tr>
+        <tr><td>$S$</td><td>98.73</td><td>Desviación estándar muestral</td></tr>
+        <tr><td>$CV$</td><td>40.88%</td><td>$S/\\bar{y}\\times 100$ → Alta dispersión</td></tr>
+        <tr><td>Asimetría</td><td class="highlight">1.084</td><td>$> 0$: Cola derecha más pesada</td></tr>
+        <tr><td>Curtosis</td><td>1.186</td><td>$> 0$: Colas más pesadas que la normal</td></tr>
+    </table>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — Análisis de indicadores</div>
+        <p>La asimetría de 1.084 (> 1) indica sesgo positivo significativo. La media (241.5) supera la mediana (223.0), lo cual es consistente. El dato 485 es un outlier potencial: $(485-241.5)/98.73 = 2.47$ desviaciones estándar.</p>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 3 — Gráfico Q-Q Normal y Histograma</div>
+        <p>Se presentan el histograma y el gráfico Q-Q normal. En el Q-Q, si los datos fueran normales, los puntos seguirían la línea diagonal. La desviación en los extremos (especialmente el derecho) evidencia la no normalidad.</p>
+    </div>
+
+    <div class="chart-row">
+        <div id="chart-225-hist" class="chart-container"></div>
+        <div id="chart-225-qq" class="chart-container"></div>
+    </div>
+
+    <div class="decision-box reject"><strong>Conclusión:</strong> Los datos NO pueden modelarse adecuadamente con una distribución normal. La asimetría positiva significativa ($g_1=1.08$), el outlier extremo (485 h), y la diferencia media-mediana (18.5 h) sugieren una distribución <strong>log-normal</strong> o <strong>exponencial</strong> como alternativas más adecuadas.</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación práctica</div>
+        <p>Los tiempos de reparación suelen tener asimetría derecha: la mayoría de las reparaciones toman un tiempo moderado, pero algunas pocas toman mucho más por complicaciones inesperadas. Esto es típico de datos de tiempos, y la distribución log-normal es el modelo natural. Si se necesitara aplicar una prueba $t$, se recomienda primero transformar con $\\ln(y)$ para simetrizar la distribución.</p>
+    </div>
+    `
+},
+{
+    id:"2.30", title:"Ejercicio 2.30", subtitle:"Prueba F y prueba t — Filtro de impureza", topic:"Prueba F / Prueba t",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Antes: $\\bar{y}_1=12.5\\%$, $S_1^2=101.17$, $n_1=8$. Después: $\\bar{y}_2=10.2\\%$, $S_2^2=94.73$, $n_2=9$. ¿El filtro redujo la impureza?</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Inciso (a): Prueba F — Igualdad de varianzas</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Planteamiento</div>
+        <p>$H_0:\\sigma_1^2=\\sigma_2^2$ vs $H_1:\\sigma_1^2\\neq\\sigma_2^2$, con $\\alpha=0.05$.</p>
+        <div class="formula-box">$$F_0 = \\frac{S_1^2}{S_2^2} = \\frac{101.17}{94.73} = 1.068$$</div>
+        <p>Grados de libertad: $\\nu_1 = n_1-1=7$, $\\nu_2 = n_2-1=8$.</p>
+        <div class="formula-box">$$F_{\\alpha/2,7,8} = 4.529, \\quad F_{1-\\alpha/2,7,8} = 1/F_{\\alpha/2,8,7} = 0.204$$</div>
+        <p>Como $0.204 < 1.068 < 4.529$, no se rechaza $H_0$.</p>
+    </div>
+    <div class="decision-box no-reject">$F_0=1.068$ está dentro de la región de no rechazo. Las varianzas son estadísticamente iguales ($p\\approx 0.92$).</div>
+
+    <h5>Inciso (b): Prueba t pooled — ¿Redujo la impureza?</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculos paso a paso</div>
+        <p>Como las varianzas son iguales, usamos la prueba t con varianza agrupada (pooled):</p>
+        <div class="formula-box">$$H_0:\\mu_1=\\mu_2 \\quad vs \\quad H_1:\\mu_1>\\mu_2 \\quad \\text{(una cola derecha)}$$</div>
+        <div class="formula-box">$$S_p^2 = \\frac{(n_1-1)S_1^2+(n_2-1)S_2^2}{n_1+n_2-2} = \\frac{7(101.17)+8(94.73)}{15} = \\frac{708.19+757.84}{15} = 97.74$$</div>
+        <div class="formula-box">$$t_0 = \\frac{\\bar{y}_1-\\bar{y}_2}{S_p\\sqrt{1/n_1+1/n_2}} = \\frac{12.5-10.2}{9.886\\sqrt{1/8+1/9}} = \\frac{2.3}{9.886\\times 0.4787} = \\frac{2.3}{4.733} = 0.486$$</div>
+        <p>$t_{\\text{crit}}(\\alpha=0.05, gl=15) = 1.753$. Como $0.486 < 1.753$, no se rechaza.</p>
+    </div>
+    <div class="decision-box no-reject">$t_0=0.486 < 1.753$ ($p\\approx 0.32$). No hay evidencia de que el filtro reduzca significativamente la impureza.</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Aunque la media de impureza bajó numéricamente de 12.5% a 10.2%, esta reducción de 2.3 puntos porcentuales no es estadísticamente significativa dado el alto nivel de variabilidad (varianzas ~100). El error estándar de la diferencia (4.73) es mayor que la diferencia misma. Se necesitarían muestras mucho más grandes o una reducción mayor para alcanzar significancia estadística.</p>
+    </div>
+    `
+},
+{
+    id:"2.35", title:"Ejercicio 2.35", subtitle:"Prueba t pareada — Gemelos monocigóticos", topic:"Prueba t pareada",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Puntajes de inteligencia en 10 pares de gemelos monocigóticos, según orden de nacimiento.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Datos y diferencias $d_j = y_{1j}-y_{2j}$</h5>
+    <table class="data-table">
+        <tr><th>Par</th><th>Orden 1</th><th>Orden 2</th><th>$d_j$</th><th>$d_j^2$</th></tr>
+        <tr><td>1</td><td>6.08</td><td>5.73</td><td>0.35</td><td>0.1225</td></tr>
+        <tr><td>2</td><td>6.22</td><td>5.80</td><td>0.42</td><td>0.1764</td></tr>
+        <tr><td>3</td><td>7.99</td><td>8.42</td><td>−0.43</td><td>0.1849</td></tr>
+        <tr><td>4</td><td>7.44</td><td>6.84</td><td>0.60</td><td>0.3600</td></tr>
+        <tr><td>5</td><td>6.48</td><td>6.43</td><td>0.05</td><td>0.0025</td></tr>
+        <tr><td>6</td><td>7.99</td><td>8.76</td><td>−0.77</td><td>0.5929</td></tr>
+        <tr><td>7</td><td>6.32</td><td>6.32</td><td>0.00</td><td>0.0000</td></tr>
+        <tr><td>8</td><td>7.60</td><td>7.62</td><td>−0.02</td><td>0.0004</td></tr>
+        <tr><td>9</td><td>6.03</td><td>6.59</td><td>−0.56</td><td>0.3136</td></tr>
+        <tr><td>10</td><td>7.52</td><td>7.67</td><td>−0.15</td><td>0.0225</td></tr>
+        <tr><td colspan="3"><strong>Totales</strong></td><td class="highlight">$\\sum d_j = -0.51$</td><td>$\\sum d_j^2 = 1.776$</td></tr>
+    </table>
+
+    <h5>Inciso (a): Normalidad de las diferencias</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Evaluación de normalidad</div>
+        <div class="formula-box">$$\\bar{d} = \\frac{-0.51}{10} = -0.051, \\quad S_d = \\sqrt{\\frac{\\sum d_j^2 - n\\bar{d}^2}{n-1}} = \\sqrt{\\frac{1.776 - 10(0.051)^2}{9}} = 0.441$$</div>
+        <p>Asimetría $\\approx -0.18$ (cercana a 0) y Curtosis $\\approx -0.82$ (platocúrtica moderada). Con solo $n=10$, la normalidad es difícil de evaluar, pero ambos indicadores están en rangos aceptables. Se concluye que la normalidad es <strong>razonable</strong>.</p>
+    </div>
+
+    <h5>Inciso (b): IC 95%</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculo del intervalo</div>
+        <div class="formula-box">$$SE_d = \\frac{S_d}{\\sqrt{n}} = \\frac{0.441}{\\sqrt{10}} = 0.139$$</div>
+        <div class="formula-box">$$IC_{95\\%} = \\bar{d}\\pm t_{0.025,9}\\times SE_d = -0.051\\pm 2.262\\times 0.139$$</div>
+        <div class="formula-box">$$\\boxed{IC_{95\\%} = [-0.366,\\; 0.264]}$$</div>
+        <p>El IC incluye 0, lo que indica que no hay evidencia de diferencia significativa.</p>
+    </div>
+
+    <h5>Inciso (c): Prueba t pareada</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Prueba de hipótesis</div>
+        <div class="formula-box">$$H_0:\\mu_d=0 \\quad vs \\quad H_1:\\mu_d\\neq 0$$</div>
+        <div class="formula-box">$$t_0 = \\frac{\\bar{d}}{SE_d} = \\frac{-0.051}{0.139} = -0.367, \\quad gl=9$$</div>
+        <div class="formula-box">$$p = 2\\times P(T_9>0.367) \\approx 0.722$$</div>
+    </div>
+    <div class="decision-box no-reject">$p=0.722 \\gg 0.05$. No se rechaza $H_0$. El puntaje de inteligencia <strong>NO depende</strong> del orden de nacimiento.</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>No existe evidencia estadística de que el orden de nacimiento en gemelos monocigóticos afecte los puntajes de inteligencia. La diferencia media observada ($-0.051$) es insignificante tanto estadística como prácticamente. Se eligió correctamente la prueba t pareada porque cada par de gemelos comparte genética idéntica, reduciendo la variabilidad interindividual.</p>
+    </div>
+    `
+},
+{
+    id:"2.40", title:"Ejercicio 2.40", subtitle:"Estadístico para $H_0: 2\\mu_1=\\mu_2$", topic:"Desarrollo teórico",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Dos tabletas: se afirma que la Tableta 1 se absorbe el doble de rápido. Desarrollar un estadístico para $H_0:2\\mu_1=\\mu_2$ con $\\sigma_1^2, \\sigma_2^2$ conocidas.</div>
+
+    <h4>Desarrollo completo</h4>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 1</span> Reformulación de la hipótesis</div>
+        <p>Definimos $\\theta = 2\\mu_1-\\mu_2$. Entonces:</p>
+        <div class="formula-box">$$H_0: \\theta=0 \\quad vs \\quad H_1: \\theta\\neq 0$$</div>
+        <p>El estimador natural es $\\hat{\\theta}=2\\bar{y}_1-\\bar{y}_2$.</p>
+    </div>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 2</span> Distribución del estimador</div>
+        <p>Como $\\bar{y}_1$ y $\\bar{y}_2$ son independientes y normales:</p>
+        <div class="formula-box">$$E(\\hat{\\theta}) = 2\\mu_1-\\mu_2 = \\theta$$</div>
+        <div class="formula-box">$$\\text{Var}(\\hat{\\theta}) = \\text{Var}(2\\bar{y}_1)+\\text{Var}(\\bar{y}_2) = \\frac{4\\sigma_1^2}{n_1}+\\frac{\\sigma_2^2}{n_2}$$</div>
+        <p>Entonces $\\hat{\\theta}\\sim N\\left(\\theta,\\;\\frac{4\\sigma_1^2}{n_1}+\\frac{\\sigma_2^2}{n_2}\\right)$.</p>
+    </div>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 3</span> Estadístico de prueba</div>
+        <p>Bajo $H_0$ ($\\theta=0$):</p>
+        <div class="formula-box">$$\\boxed{Z_0 = \\frac{2\\bar{y}_1-\\bar{y}_2}{\\sqrt{\\dfrac{4\\sigma_1^2}{n_1}+\\dfrac{\\sigma_2^2}{n_2}}} \\sim N(0,1)}$$</div>
+        <p>Rechazar $H_0$ si $|Z_0|>Z_{\\alpha/2}$. Valor-p $= 2[1-\\Phi(|Z_0|)]$.</p>
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Este desarrollo ilustra cómo construir un estadístico para cualquier combinación lineal de medias: se define el parámetro de interés como la combinación lineal, se obtiene su distribución usando propiedades de la normal, y se estandariza bajo $H_0$. La clave es calcular correctamente la varianza: los coeficientes al cuadrado multiplican las varianzas ($2^2=4$ en este caso).</p>
+    </div>
+    `
+},
+{
+    id:"2.45", title:"Ejercicio 2.45", subtitle:"Derivación del IC para $\\sigma_1^2/\\sigma_2^2$", topic:"Desarrollo teórico",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Derivar la Ecuación 2.50 de Montgomery: IC del $100(1-\\alpha)\\%$ para la razón de varianzas.</div>
+
+    <h4>Derivación completa</h4>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 1</span> Distribución F pivotal</div>
+        <p>Si $X_1\\sim N(\\mu_1,\\sigma_1^2)$ y $X_2\\sim N(\\mu_2,\\sigma_2^2)$ con muestras independientes:</p>
+        <div class="formula-box">$$F = \\frac{S_1^2/\\sigma_1^2}{S_2^2/\\sigma_2^2} = \\frac{S_1^2}{S_2^2}\\cdot\\frac{\\sigma_2^2}{\\sigma_1^2} \\sim F(n_1-1, n_2-1)$$</div>
+    </div>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 2</span> Intervalo de probabilidad</div>
+        <div class="formula-box">$$P\\left(F_{1-\\alpha/2,n_1-1,n_2-1} \\leq \\frac{S_1^2}{S_2^2}\\cdot\\frac{\\sigma_2^2}{\\sigma_1^2} \\leq F_{\\alpha/2,n_1-1,n_2-1}\\right) = 1-\\alpha$$</div>
+    </div>
+
+    <div class="proof-step">
+        <div class="step-title"><span class="step-label">Paso 3</span> Despeje de $\\sigma_1^2/\\sigma_2^2$</div>
+        <p>Dividiendo cada parte de la desigualdad entre $S_1^2/S_2^2$ e invirtiendo:</p>
+        <div class="formula-box">$$\\boxed{\\frac{S_1^2}{S_2^2}\\cdot\\frac{1}{F_{\\alpha/2,n_1-1,n_2-1}} \\leq \\frac{\\sigma_1^2}{\\sigma_2^2} \\leq \\frac{S_1^2}{S_2^2}\\cdot\\frac{1}{F_{1-\\alpha/2,n_1-1,n_2-1}}}$$</div>
+        <p>Usando la relación $F_{1-\\alpha/2,\\nu_1,\\nu_2}=1/F_{\\alpha/2,\\nu_2,\\nu_1}$, esto equivale a la Ecuación 2.50:</p>
+        <div class="formula-box">$$\\frac{S_1^2}{S_2^2}\\cdot F_{1-\\alpha/2,n_2-1,n_1-1} \\leq \\frac{\\sigma_1^2}{\\sigma_2^2} \\leq \\frac{S_1^2}{S_2^2}\\cdot F_{\\alpha/2,n_2-1,n_1-1}$$</div>
+    </div>
+    `
+},
+{
+    id:"2.50", title:"Ejercicio 2.50", subtitle:"Potencia y tamaño de muestra — Máquinas llenadoras", topic:"Potencia",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Dos máquinas: $\\sigma_1=0.015$ oz, $\\sigma_2=0.018$ oz, $n=10$, $\\delta=0.25$ oz.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Inciso (a): Potencia con $n=10$</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculos</div>
+        <div class="formula-box">$$SE = \\sqrt{\\frac{\\sigma_1^2+\\sigma_2^2}{n}} = \\sqrt{\\frac{0.015^2+0.018^2}{10}} = \\sqrt{\\frac{0.000549}{10}} = 0.00741$$</div>
+        <div class="formula-box">$$\\lambda = \\frac{\\delta}{SE} = \\frac{0.25}{0.00741} = 33.74$$</div>
+        <p>La potencia se calcula como: $\\beta = \\Phi(Z_{\\alpha/2}-\\lambda)-\\Phi(-Z_{\\alpha/2}-\\lambda) = \\Phi(1.96-33.74)-\\Phi(-1.96-33.74) \\approx 0$.</p>
+        <div class="formula-box">$$\\text{Potencia} = 1-\\beta \\approx 1.0 \\quad (100\\%)$$</div>
+    </div>
+    <div class="decision-box correct">La diferencia de 0.25 oz es enorme comparada con la variabilidad (~0.02 oz). Se detecta con certeza absoluta usando $n=10$.</div>
+
+    <h5>Inciso (b): $n$ para potencia $\\geq 90\\%$</h5>
+    <div class="formula-box">$$n \\geq \\frac{(Z_{\\alpha/2}+Z_\\beta)^2(\\sigma_1^2+\\sigma_2^2)}{\\delta^2} = \\frac{(1.96+1.28)^2(0.000549)}{0.0625} = \\frac{10.4976\\times 0.000549}{0.0625} \\approx 0.092$$</div>
+    <p>Se redondea a $n=1$. Con estas varianzas tan pequeñas respecto a $\\delta$, basta una observación por grupo.</p>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Este ejercicio ilustra un caso extremo: cuando la diferencia a detectar ($\\delta=0.25$ oz) es enorme comparada con la variabilidad del proceso ($\\sigma\\approx 0.017$ oz), la potencia es prácticamente 1. En la práctica, $\\delta=0.25$ oz es 14 veces mayor que $\\sigma$, haciendo que el efecto sea trivial de detectar. Se recomienda replantear con una $\\delta$ más realista (por ejemplo, $\\delta=0.01$ oz) para obtener un análisis de potencia útil.</p>
+    </div>
+    `
+},
+{
+    id:"2.55", title:"Ejercicio 2.55", subtitle:"¿Es crítico el supuesto de normalidad en la prueba t?", topic:"Conceptual",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> ¿Es crítico el supuesto de muestreo de una distribución normal en la aplicación de la prueba t?</div>
+
+    <div class="decision-box info"><strong>Respuesta:</strong> NO es crítico en la mayoría de situaciones prácticas, especialmente con $n\\geq 30$.</div>
+
+    <h4>Justificación detallada</h4>
+
+    <p>La prueba $t$ es <strong>robusta</strong> ante desviaciones moderadas de normalidad gracias al Teorema del Límite Central (TLC): $\\bar{y}$ converge a normalidad sin importar la distribución original, siempre que $n$ sea suficientemente grande.</p>
+
+    <table class="data-table">
+        <tr><th>Tamaño $n$</th><th>Asimetría moderada</th><th>Colas pesadas</th><th>Outliers</th><th>Recomendación</th></tr>
+        <tr><td>$n < 10$</td><td class="no">Crítico</td><td class="no">Crítico</td><td class="no">No confiable</td><td>Wilcoxon o aumentar $n$</td></tr>
+        <tr><td>$10\\leq n < 30$</td><td class="yes">Robusta</td><td>Moderado</td><td>Verificar</td><td>Q-Q plot y Shapiro-Wilk</td></tr>
+        <tr><td>$n\\geq 30$</td><td class="yes">Robusta</td><td class="yes">Robusta</td><td>Verificar</td><td>TLC garantiza validez</td></tr>
+    </table>
+
+    <p><strong>Cuándo SÍ importa:</strong> muestras muy pequeñas ($n<10$), outliers extremos, o pruebas sobre varianzas (F, $\\chi^2$) que son más sensibles a no-normalidad.</p>
+
+    <p><strong>Herramientas de verificación:</strong> gráfico Q-Q, prueba de Shapiro-Wilk ($n<50$), prueba de Anderson-Darling, histograma. Si la normalidad no se cumple, usar pruebas no paramétricas (Wilcoxon-Mann-Whitney) o transformar datos ($\\ln$, $\\sqrt{}$).</p>
+    `
+},
+{
+    id:"2.60", title:"Ejercicio 2.60", subtitle:"Error Tipo I vs. Tipo II en I+D temprana", topic:"Conceptual",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> En etapas tempranas de I+D, ¿cuál error es más importante: Tipo I o Tipo II?</div>
+
+    <div class="decision-box info"><strong>Respuesta:</strong> El ERROR TIPO II ($\\beta$) es más importante en I+D temprana.</div>
+
+    <h4>Análisis detallado</h4>
+
+    <table class="data-table">
+        <tr><th>Aspecto</th><th>Error Tipo I ($\\alpha$)</th><th>Error Tipo II ($\\beta$)</th></tr>
+        <tr><td>Definición</td><td>Rechazar $H_0$ siendo verdadera</td><td>No rechazar $H_0$ siendo falsa</td></tr>
+        <tr><td>En I+D</td><td>Investigar pista falsa</td><td>Descartar pista valiosa</td></tr>
+        <tr><td>Consecuencia</td><td>Corregible (se descubre luego)</td><td class="no">Potencialmente irreversible</td></tr>
+        <tr><td>Importancia</td><td>Menor en exploración</td><td class="highlight">MAYOR en exploración</td></tr>
+        <tr><td>$\\alpha$ sugerido</td><td>0.10 – 0.15 (más laxo)</td><td>Potencia $\\geq 80\\%$</td></tr>
+    </table>
+
+    <div class="conclusion-box">
+        <strong>Estrategia en dos etapas:</strong> (1) Fase exploratoria con $\\alpha=0.10$ para maximizar potencia y no perder señales débiles. (2) Fase confirmatoria con $\\alpha=0.01$ y muestras más grandes para validar hallazgos. Esta estrategia controla ambos errores a nivel global.
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>En etapas tempranas, el costo de oportunidad de descartar un descubrimiento real (Tipo II) supera al de perseguir una pista falsa (Tipo I). Un falso positivo se detectará en etapas posteriores, pero un falso negativo se pierde para siempre. Por eso Montgomery recomienda usar niveles de significancia más altos en la fase exploratoria, priorizando la sensibilidad sobre la especificidad.</p>
+    </div>
+    `
+}
+];
+
+// ============================
+// EXERCISE DATA — CHAPTER 3
+// ============================
+const cap3Exercises = [
+{
+    id:"3.5", title:"Ejercicio 3.5", subtitle:"¿Qué estima el CME en ANOVA?", topic:"Conceptual",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> El CME en el ANOVA estima: (a) varianza del error, (b) varianza de un promedio de tratamiento, (c) desviación estándar, (d) ninguna.</div>
+
+    <div class="decision-box correct"><strong>Respuesta: (a)</strong> La varianza del error aleatorio $\\sigma^2$.</div>
+
+    <h4>Justificación</h4>
+    <div class="formula-box">$$E[CME] = E\\left[\\frac{SS_E}{N-a}\\right] = \\sigma^2$$</div>
+    <p>El CME es un estimador <strong>insesgado</strong> de $\\sigma^2$. Análisis de las opciones incorrectas:</p>
+    <p>• Opción (b): $\\text{Var}(\\bar{y}_{i\\cdot}) = \\sigma^2/n$, que se estima con $CME/n$, no con $CME$.</p>
+    <p>• Opción (c): $\\sigma$ se estima con $\\sqrt{CME}$, no con $CME$ directamente.</p>
+    <p>• Opción (d): La (a) es correcta, por lo que (d) no aplica.</p>
+    `
+},
+{
+    id:"3.6", title:"Ejercicio 3.6", subtitle:"Verificación de normalidad con Anderson-Darling", topic:"Conceptual",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> ¿Es buena práctica verificar normalidad con Anderson-Darling sobre los residuales?</div>
+    <div class="decision-box correct"><strong>Respuesta: (a) VERDADERO.</strong></div>
+
+    <h4>Justificación</h4>
+    <p>Siempre se recomienda verificar la normalidad de los residuales $e_{ij}=y_{ij}-\\bar{y}_{i\\cdot}$ mediante:</p>
+    <p><strong>Métodos gráficos:</strong> Q-Q plot normal (los puntos deben seguir la línea diagonal), histograma de residuales.</p>
+    <p><strong>Pruebas formales:</strong> Anderson-Darling (buena potencia general), Shapiro-Wilk (potente para $n<50$), Kolmogorov-Smirnov.</p>
+    <p>Aunque el ANOVA es robusto a desviaciones moderadas, la verificación permite detectar problemas graves (outliers, heterocedasticidad disfrazada) que invalidarían los resultados. Montgomery (Sección 3.4.1) recomienda explícitamente esta práctica.</p>
+    `
+},
+{
+    id:"3.8", title:"Ejercicio 3.8", subtitle:"Completar tabla ANOVA", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Completar tabla ANOVA: CMT=246.93, SCE=186.53, SCT=1174.24, gl_Error=25, gl_Total=29.</div>
+
+    <h4>Procedimiento paso a paso</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Grados de libertad</div>
+        <p>$gl_{Total} = N-1 = 29 \\Rightarrow N=30$. $gl_{Factor} = gl_{Total}-gl_{Error} = 29-25 = 4$. Entonces $a=5$ tratamientos.</p>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — Sumas de cuadrados</div>
+        <div class="formula-box">$$SC_{Factor} = SC_{Total}-SC_{Error} = 1174.24-186.53 = 987.71$$</div>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 3 — Cuadrados medios y F</div>
+        <div class="formula-box">$$CME = \\frac{186.53}{25} = 7.461, \\qquad F_0 = \\frac{246.93}{7.461} = 33.10$$</div>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Factor</td><td class="highlight">4</td><td class="highlight">987.71</td><td>246.93</td><td class="highlight">33.10</td><td class="highlight">$<0.001$</td></tr>
+        <tr><td>Error</td><td>25</td><td>186.53</td><td class="highlight">7.461</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>29</td><td>1174.24</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">$F_0=33.10 \\gg F_{0.05,4,25}\\approx 2.76$. Se RECHAZA $H_0$. Al menos un tratamiento tiene efecto significativo.</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>El estadístico F es extremadamente grande (33.1 vs. valor crítico de 2.76), dando un p-valor prácticamente cero. Esto indica que las diferencias entre tratamientos son altamente significativas. El $R^2 = SC_{Factor}/SC_{Total} = 987.71/1174.24 = 84.1\\%$, lo que significa que el factor explica el 84% de la variabilidad total.</p>
+    </div>
+    `
+},
+{
+    id:"3.9", title:"Ejercicio 3.9", subtitle:"Estudio observacional vs. experimento — Chocolate", topic:"Conceptual",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Estudio NHLBI: mayor consumo de chocolate asociado a mayor nivel de depresión (puntaje CES-D).</div>
+
+    <h5>Inciso (a): ¿Es un experimento diseñado?</h5>
+    <div class="decision-box info"><strong>NO.</strong> Es un estudio observacional (transversal). No hubo asignación aleatoria ni control del investigador sobre el consumo de chocolate.</div>
+
+    <h5>Inciso (b): ¿Establece causalidad?</h5>
+    <div class="decision-box info"><strong>NO.</strong> Solo muestra asociación. Problemas: (1) Causalidad inversa (la depresión podría causar mayor consumo). (2) Variables de confusión no controladas (sedentarismo, nivel socioeconómico). (3) Diseño transversal (no establece temporalidad).</div>
+
+    <h5>Inciso (c): Diseño correcto</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Experimento Controlado Aleatorizado (RCT)</div>
+        <p><strong>Factor:</strong> Cantidad de chocolate (controlada). <strong>Niveles:</strong> 0, 5 y 12 porciones/mes. <strong>Respuesta:</strong> Escala PHQ-9 (antes y después). <strong>N:</strong> ≥100 sujetos por grupo, asignados aleatoriamente. <strong>Duración:</strong> 3-6 meses. <strong>Doble ciego:</strong> Chocolate vs. placebo similar. <strong>Control de confusión:</strong> Dieta, ejercicio, sueño, medicamentos.</p>
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Este ejercicio ilustra la diferencia fundamental entre asociación y causalidad. Solo un experimento aleatorizado permite establecer relaciones causales, porque la aleatorización equilibra variables de confusión conocidas y desconocidas. El estudio observacional del NHLBI es útil para generar hipótesis, pero no puede confirmarlas.</p>
+    </div>
+    `
+},
+{
+    id:"3.11", title:"Ejercicio 3.11", subtitle:"Cemento Portland — ANOVA completo con LSD y residuales", topic:"ANOVA + LSD",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 4 técnicas de mezcla de cemento Portland, 4 réplicas c/u. Variable: resistencia a la tensión (lb/in²).</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Datos</h5>
+    <table class="data-table">
+        <tr><th>Técnica</th><th>Obs 1</th><th>Obs 2</th><th>Obs 3</th><th>Obs 4</th><th>$\\bar{y}_{i\\cdot}$</th><th>$S_i^2$</th></tr>
+        <tr><td>T1</td><td>3129</td><td>3000</td><td>2865</td><td>2890</td><td class="highlight">2971.00</td><td>14534</td></tr>
+        <tr><td>T2</td><td>3200</td><td>3300</td><td>2975</td><td>3150</td><td class="highlight">3156.25</td><td>18490</td></tr>
+        <tr><td>T3</td><td>2800</td><td>2900</td><td>2985</td><td>3050</td><td class="highlight">2933.75</td><td>11723</td></tr>
+        <tr><td>T4</td><td>2600</td><td>2700</td><td>2600</td><td>2765</td><td class="highlight">2666.25</td><td>6556</td></tr>
+    </table>
+    <p>$\\bar{y}_{\\cdot\\cdot} = 2931.81$, $N=16$, $a=4$, $n=4$.</p>
+
+    <h5>Inciso (a): ANOVA</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculos de sumas de cuadrados</div>
+        <div class="formula-box">$$SS_{Total} = \\sum_i\\sum_j y_{ij}^2 - \\frac{y_{\\cdot\\cdot}^2}{N} = 138,099,009 - \\frac{(46909)^2}{16} = 627,893.94$$</div>
+        <div class="formula-box">$$SS_{Tr} = \\sum_i\\frac{y_{i\\cdot}^2}{n} - \\frac{y_{\\cdot\\cdot}^2}{N} = n\\sum_i(\\bar{y}_{i\\cdot}-\\bar{y}_{\\cdot\\cdot})^2 = 489{,}740.19$$</div>
+        <div class="formula-box">$$SS_E = SS_T - SS_{Tr} = 627{,}893.94 - 489{,}740.19 = 138{,}153.75$$</div>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Técnica</td><td>3</td><td>489,740.19</td><td>163,246.73</td><td class="highlight">12.73</td><td class="highlight">0.0005</td></tr>
+        <tr><td>Error</td><td>12</td><td>138,153.75</td><td>11,512.81</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>15</td><td>627,893.94</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">$F_0=12.73 > F_{0.05,3,12}=3.49$. Se RECHAZA $H_0$. Las técnicas de mezcla afectan significativamente la resistencia.</div>
+
+    <h5>Inciso (b): Gráfico comparativo de medias</h5>
+    <div id="chart-311-means" class="chart-container"></div>
+
+    <h5>Inciso (c): Método LSD de Fisher ($\\alpha=0.05$)</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculo del LSD</div>
+        <div class="formula-box">$$LSD = t_{\\alpha/2, gl_E}\\times\\sqrt{\\frac{2\\cdot CME}{n}} = t_{0.025,12}\\times\\sqrt{\\frac{2(11512.81)}{4}} = 2.179\\times 75.89 = 165.36$$</div>
+        <p>Dos medias difieren significativamente si $|\\bar{y}_{i\\cdot}-\\bar{y}_{j\\cdot}|>165.36$.</p>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Comparación</th><th>$|\\bar{y}_i-\\bar{y}_j|$</th><th>$> LSD$?</th><th>Significativo</th></tr>
+        <tr><td>T2 vs T4</td><td class="highlight">490.00</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T1 vs T4</td><td class="highlight">304.75</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T3 vs T4</td><td class="highlight">267.50</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T2 vs T3</td><td class="highlight">222.50</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T2 vs T1</td><td class="highlight">185.25</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T1 vs T3</td><td>37.25</td><td class="no">No</td><td class="no">✗</td></tr>
+    </table>
+
+    <div class="conclusion-box"><strong>Grupos homogéneos:</strong> {T2} > {T1, T3} > {T4}. La Técnica 2 produce la mayor resistencia, y la Técnica 4 la menor.</div>
+
+    <h5>Incisos (d) y (e): Análisis de residuales</h5>
+    <p>Los residuales $e_{ij}=y_{ij}-\\bar{y}_{i\\cdot}$ se calculan restando a cada observación la media de su grupo. El gráfico Q-Q evalúa normalidad y el gráfico residuales vs. ajustados evalúa homocedasticidad.</p>
+
+    <div class="chart-row">
+        <div id="chart-311-qq" class="chart-container"></div>
+        <div id="chart-311-resid" class="chart-container"></div>
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación global</div>
+        <p>El ANOVA confirma que la técnica de mezcla tiene un efecto altamente significativo sobre la resistencia ($p=0.0005$). El método LSD revela que la Técnica 2 produce cemento más resistente que las demás, mientras que la Técnica 4 es significativamente inferior. Las Técnicas 1 y 3 no difieren entre sí. Los gráficos de residuales sugieren que los supuestos del modelo (normalidad y varianza constante) se cumplen razonablemente.</p>
+    </div>
+    `
+},
+{
+    id:"3.12", title:"Ejercicio 3.12", subtitle:"Prueba de Tukey — Cemento Portland", topic:"ANOVA + Tukey",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Repetir las comparaciones del Ej. 3.11 usando Tukey. ¿Mismas conclusiones que LSD?</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Cálculo del HSD de Tukey</div>
+        <div class="formula-box">$$HSD = q_{\\alpha,a,gl_E}\\times\\sqrt{\\frac{CME}{n}} = q_{0.05,4,12}\\times\\sqrt{\\frac{11512.81}{4}}$$</div>
+        <div class="formula-box">$$HSD = 4.20\\times 53.66 = 225.37$$</div>
+        <p>Donde $q_{0.05,4,12}=4.20$ es el valor de la distribución del rango estudentizado.</p>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Comparación</th><th>$|\\bar{y}_i-\\bar{y}_j|$</th><th>$> HSD$?</th><th>Significativo</th></tr>
+        <tr><td>T2 vs T4</td><td>490.00</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T1 vs T4</td><td>304.75</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T3 vs T4</td><td>267.50</td><td class="yes">Sí</td><td class="yes">✓</td></tr>
+        <tr><td>T2 vs T3</td><td>222.50</td><td class="no">No</td><td class="no">✗</td></tr>
+        <tr><td>T2 vs T1</td><td>185.25</td><td class="no">No</td><td class="no">✗</td></tr>
+        <tr><td>T1 vs T3</td><td>37.25</td><td class="no">No</td><td class="no">✗</td></tr>
+    </table>
+
+    <div class="conclusion-box"><strong>Tukey:</strong> Solo la Técnica 4 difiere significativamente de las demás. Tukey es más conservador que LSD — detectó 3 diferencias significativas vs. 5 del LSD.</div>
+
+    <h5>Inciso (b): Diferencia entre Tukey y Fisher LSD</h5>
+    <table class="data-table">
+        <tr><th>Aspecto</th><th>Fisher LSD</th><th>Tukey HSD</th></tr>
+        <tr><td>Valor crítico</td><td>165.36</td><td>225.37</td></tr>
+        <tr><td>Comparaciones significativas</td><td>5 de 6</td><td>3 de 6</td></tr>
+        <tr><td>Control de error</td><td>Tasa por comparación ($\\alpha_{PC}$)</td><td>Tasa experimental ($\\alpha_{EW}$)</td></tr>
+        <tr><td>Conservadurismo</td><td class="no">Menos conservador</td><td class="yes">Más conservador</td></tr>
+    </table>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Tukey controla la tasa de error experimentalwise (probabilidad de al menos un falso positivo entre todas las comparaciones), lo que resulta en un umbral más alto (225 vs. 165). LSD solo controla la tasa por comparación. Para 6 comparaciones simultáneas, Tukey es preferible para evitar falsos positivos, pero Fisher LSD puede ser más adecuado cuando el ANOVA global es significativo (prueba protegida de Fisher).</p>
+    </div>
+    `
+},
+{
+    id:"3.20", title:"Ejercicio 3.20", subtitle:"Temperatura de cocción — Densidad de ladrillos", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 4 temperaturas de cocción, diseño desbalanceado ($n_i$ = 5, 4, 5, 4). Variable: densidad del ladrillo.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <table class="data-table">
+        <tr><th>Temp.</th><th>Obs 1</th><th>Obs 2</th><th>Obs 3</th><th>Obs 4</th><th>Obs 5</th><th>$n_i$</th><th>$\\bar{y}_{i\\cdot}$</th></tr>
+        <tr><td>100°C</td><td>21.8</td><td>21.9</td><td>21.7</td><td>21.6</td><td>21.7</td><td>5</td><td class="highlight">21.74</td></tr>
+        <tr><td>125°C</td><td>21.7</td><td>21.4</td><td>21.5</td><td>21.4</td><td>—</td><td>4</td><td class="highlight">21.50</td></tr>
+        <tr><td>150°C</td><td>21.9</td><td>21.8</td><td>21.8</td><td>21.6</td><td>21.5</td><td>5</td><td class="highlight">21.72</td></tr>
+        <tr><td>175°C</td><td>21.9</td><td>21.7</td><td>21.8</td><td>21.4</td><td>—</td><td>4</td><td class="highlight">21.70</td></tr>
+    </table>
+
+    <h5>Inciso (a): ANOVA</h5>
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Temperatura</td><td>3</td><td>0.1390</td><td>0.0463</td><td class="highlight">1.80</td><td class="highlight">0.195</td></tr>
+        <tr><td>Error</td><td>14</td><td>0.3610</td><td>0.0258</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>17</td><td>0.5000</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box no-reject">$F_0=1.80 < F_{0.05,3,14}=3.34$ ($p=0.195$). No se rechaza $H_0$. La temperatura NO afecta significativamente la densidad.</div>
+
+    <h5>Inciso (b): Comparaciones LSD</h5>
+    <p>Dado que el ANOVA global no es significativo, no es apropiado realizar comparaciones múltiples con LSD. Hacer comparaciones post-hoc sin significancia global infla la tasa de error Tipo I.</p>
+
+    <h5>Incisos (c) y (d): Residuales y gráfico de medias</h5>
+    <div class="chart-row">
+        <div id="chart-320-means" class="chart-container"></div>
+        <div id="chart-320-qq" class="chart-container"></div>
+    </div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>La temperatura de cocción no afecta significativamente la densidad del ladrillo en el rango 100°C–175°C. Las medias varían solo entre 21.50 y 21.74, una diferencia muy pequeña comparada con la variabilidad dentro de cada grupo. El diseño desbalanceado ($n_i$ = 4 o 5) reduce ligeramente la potencia pero no invalida el análisis. Los residuales muestran normalidad adecuada.</p>
+    </div>
+    `
+},
+{
+    id:"3.25", title:"Ejercicio 3.25", subtitle:"Radón liberado en duchas — ANOVA", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 6 diámetros de orificio, 4 réplicas. Variable: % radón liberado.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <table class="data-table">
+        <tr><th>Diámetro</th><th>Obs 1</th><th>Obs 2</th><th>Obs 3</th><th>Obs 4</th><th>$\\bar{y}_{i\\cdot}$</th></tr>
+        <tr><td>0.37</td><td>80</td><td>83</td><td>83</td><td>85</td><td class="highlight">82.75</td></tr>
+        <tr><td>0.51</td><td>75</td><td>75</td><td>79</td><td>79</td><td class="highlight">77.00</td></tr>
+        <tr><td>0.71</td><td>74</td><td>73</td><td>76</td><td>77</td><td class="highlight">75.00</td></tr>
+        <tr><td>1.02</td><td>67</td><td>72</td><td>74</td><td>74</td><td class="highlight">71.75</td></tr>
+        <tr><td>1.40</td><td>62</td><td>62</td><td>67</td><td>69</td><td class="highlight">65.00</td></tr>
+        <tr><td>1.99</td><td>60</td><td>61</td><td>64</td><td>66</td><td class="highlight">62.75</td></tr>
+    </table>
+
+    <h5>ANOVA</h5>
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Diámetro</td><td>5</td><td>1133.00</td><td>226.60</td><td class="highlight">32.14</td><td class="highlight">$<0.001$</td></tr>
+        <tr><td>Error</td><td>18</td><td>126.92</td><td>7.05</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>23</td><td>1259.92</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">$F_0=32.14$ ($p<0.001$). Se RECHAZA $H_0$. El diámetro del orificio afecta significativamente el % de radón liberado.</div>
+
+    <h5>Gráficos: tendencia y análisis de residuales</h5>
+    <div class="chart-row">
+        <div id="chart-325-trend" class="chart-container"></div>
+        <div id="chart-325-qq" class="chart-container"></div>
+    </div>
+
+    <h5>Inciso (d): IC 95% para diámetro 1.40</h5>
+    <div class="formula-box">$$IC_{95\\%} = \\bar{y}_{1.40}\\pm t_{0.025,18}\\times\\sqrt{CME/n} = 65\\pm 2.101\\times\\sqrt{7.05/4} = 65\\pm 2.79 = [62.21,\\; 67.79]$$</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Existe una clara relación inversa: a mayor diámetro del orificio, menor % de radón liberado. El efecto es altamente significativo ($p<0.001$) y el modelo explica el $R^2=1133/1260=89.9\\%$ de la variabilidad. Como el factor es cuantitativo, podría ajustarse un modelo de regresión para describir la relación funcional entre diámetro y % de radón, lo que sería más informativo que el ANOVA simple.</p>
+    </div>
+    `
+},
+{
+    id:"3.32", title:"Ejercicio 3.32", subtitle:"Materiales aislantes — Transformación log", topic:"ANOVA + Transformación",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 5 materiales aislantes, 4 réplicas. Variable: tiempo de falla (min). Varianzas muy desiguales.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <table class="data-table">
+        <tr><th>Material</th><th>Obs 1</th><th>Obs 2</th><th>Obs 3</th><th>Obs 4</th><th>$\\bar{y}_{i\\cdot}$</th><th>$S_i^2$</th></tr>
+        <tr><td>M1</td><td>110</td><td>157</td><td>194</td><td>178</td><td>159.75</td><td>1,330</td></tr>
+        <tr><td>M2</td><td>1</td><td>2</td><td>4</td><td>18</td><td>6.25</td><td>63</td></tr>
+        <tr><td>M3</td><td>880</td><td>1256</td><td>5276</td><td>4355</td><td>2941.75</td><td>4,846,188</td></tr>
+        <tr><td>M4</td><td>495</td><td>7040</td><td>5307</td><td>10050</td><td>5723.00</td><td>15,987,486</td></tr>
+        <tr><td>M5</td><td>7</td><td>5</td><td>29</td><td>2</td><td>10.75</td><td>152</td></tr>
+    </table>
+
+    <h5>Inciso (b): Problema grave de heterocedasticidad</h5>
+    <p>Las varianzas van desde $S^2\\approx 63$ (M2) hasta $S^2\\approx 16{,}000{,}000$ (M4) — una razón de 250,000:1. Esto viola gravemente el supuesto de homocedasticidad del ANOVA y hace que los resultados sean <strong>inválidos</strong> sin transformación.</p>
+
+    <h5>Inciso (c): Transformación $y^*=\\ln(y)$</h5>
+    <div class="procedure-box">
+        <div class="proc-title">📐 Justificación</div>
+        <p>Cuando las desviaciones estándar son proporcionales a las medias (como aquí), la transformación logarítmica estabiliza la varianza. Esta relación $S_i\\propto\\bar{y}_{i\\cdot}$ es indicativa de una distribución log-normal subyacente.</p>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Material</td><td>4</td><td>165.06</td><td>41.26</td><td class="highlight">37.68</td><td class="highlight">$<0.001$</td></tr>
+        <tr><td>Error</td><td>15</td><td>16.44</td><td>1.096</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>19</td><td>181.49</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">Con la transformación log, se confirma el rechazo de $H_0$ ($F_0=37.68$, $p<0.001$). El material aislante afecta significativamente el tiempo de falla.</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>La transformación logarítmica resolvió el problema de heterocedasticidad y produjo un análisis válido. En la escala log, las varianzas son mucho más homogéneas (CME=1.096). Los materiales difieren significativamente en su tiempo medio de falla. M3 y M4 tienen tiempos mucho mayores que M2 y M5, sugiriendo que son mejores aislantes. Se recomienda reportar las medias geométricas ($e^{\\bar{y}^*}$) como descriptivos más apropiados.</p>
+    </div>
+    `
+},
+{
+    id:"3.36", title:"Ejercicio 3.36", subtitle:"Deposición de polisilicio — Efectos aleatorios", topic:"Efectos aleatorios",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 4 posiciones seleccionadas al azar en un reactor. Variable: uniformidad del grosor. 3 réplicas. Modelo de efectos aleatorios.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <table class="data-table">
+        <tr><th>Posición</th><th>Rep 1</th><th>Rep 2</th><th>Rep 3</th><th>$\\bar{y}_{i\\cdot}$</th></tr>
+        <tr><td>Pos 1</td><td>2.76</td><td>5.67</td><td>4.49</td><td class="highlight">4.307</td></tr>
+        <tr><td>Pos 2</td><td>1.43</td><td>1.70</td><td>2.19</td><td class="highlight">1.773</td></tr>
+        <tr><td>Pos 3</td><td>2.34</td><td>1.97</td><td>1.47</td><td class="highlight">1.927</td></tr>
+        <tr><td>Pos 4</td><td>0.94</td><td>1.36</td><td>1.65</td><td class="highlight">1.317</td></tr>
+    </table>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Modelo</div>
+        <p>$y_{ij}=\\mu+\\tau_i+\\varepsilon_{ij}$ donde $\\tau_i\\sim N(0,\\sigma^2_\\tau)$ y $\\varepsilon_{ij}\\sim N(0,\\sigma^2)$. Las posiciones son <strong>aleatorias</strong> (seleccionadas de una población grande), por lo que las conclusiones se generalizan a todas las posiciones del reactor.</p>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Posición</td><td>3</td><td>16.22</td><td>5.407</td><td class="highlight">8.29</td><td class="highlight">0.0077</td></tr>
+        <tr><td>Error</td><td>8</td><td>5.217</td><td>0.652</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>11</td><td>21.44</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">Se RECHAZA $H_0:\\sigma^2_\\tau=0$ ($p=0.0077$). Hay variabilidad significativa entre posiciones.</div>
+
+    <h5>Componentes de varianza</h5>
+    <div class="formula-box">$$\\hat{\\sigma}^2 = CME = 0.652, \\qquad \\hat{\\sigma}^2_\\tau = \\frac{CMTr-CME}{n} = \\frac{5.407-0.652}{3} = 1.585$$</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>La posición dentro del reactor contribuye significativamente a la variabilidad en la uniformidad del grosor. La varianza entre posiciones ($\\hat{\\sigma}^2_\\tau=1.585$) es aproximadamente 2.4 veces mayor que la varianza del error ($\\hat{\\sigma}^2=0.652$), lo que indica que las diferencias entre posiciones son la principal fuente de variabilidad. Se recomienda investigar las causas de estas diferencias (flujo de gases, temperatura).</p>
+    </div>
+    `
+},
+{
+    id:"3.37", title:"Ejercicio 3.37", subtitle:"Variabilidad total y proporción (cont. 3.36)", topic:"Efectos aleatorios",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> Continuación del Ej. 3.36. Estimar variabilidad total y proporción debida a posiciones.</div>
+
+    <h5>Inciso (a): Variabilidad total</h5>
+    <div class="formula-box">$$\\hat{\\sigma}^2_{Total} = \\hat{\\sigma}^2_\\tau + \\hat{\\sigma}^2 = 1.585 + 0.652 = 2.237$$</div>
+
+    <h5>Inciso (b): Proporción (Coeficiente de Correlación Intraclase)</h5>
+    <div class="formula-box">$$\\hat{\\rho} = \\frac{\\hat{\\sigma}^2_\\tau}{\\hat{\\sigma}^2_{Total}} = \\frac{1.585}{2.237} = 0.709 \\quad (70.9\\%)$$</div>
+
+    <h5>Inciso (c): Impacto de eliminar variabilidad</h5>
+    <div class="conclusion-box"><strong>Si se eliminara la variabilidad entre posiciones</strong>, la variabilidad total se reduciría de $\\hat{\\sigma}^2_{Total}=2.237$ a $\\hat{\\sigma}^2=0.652$, una reducción del <strong>70.9%</strong>. La empresa debería investigar las diferencias entre posiciones del reactor para mejorar la uniformidad del grosor de película.</div>
+    `
+},
+{
+    id:"3.56", title:"Ejercicio 3.56", subtitle:"Velocidad de avance CNC — Efectos de dispersión", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 4 velocidades de avance en CNC. Variable: desviación estándar de la dimensión crítica ($\\times 10^{-3}$ mm). 5 réplicas por velocidad.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <table class="data-table">
+        <tr><th>Vel. (in/min)</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>$\\bar{y}_{i\\cdot}$</th></tr>
+        <tr><td>10</td><td>0.09</td><td>0.10</td><td>0.13</td><td>0.08</td><td>0.07</td><td class="highlight">0.094</td></tr>
+        <tr><td>12</td><td>0.06</td><td>0.09</td><td>0.12</td><td>0.07</td><td>0.12</td><td class="highlight">0.092</td></tr>
+        <tr><td>14</td><td>0.11</td><td>0.08</td><td>0.08</td><td>0.05</td><td>0.06</td><td class="highlight">0.076</td></tr>
+        <tr><td>16</td><td>0.19</td><td>0.13</td><td>0.15</td><td>0.20</td><td>0.11</td><td class="highlight">0.156</td></tr>
+    </table>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Velocidad</td><td>3</td><td>0.01866</td><td>0.00622</td><td class="highlight">7.51</td><td class="highlight">0.0023</td></tr>
+        <tr><td>Error</td><td>16</td><td>0.01324</td><td>0.000828</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>19</td><td>0.03190</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">La velocidad SÍ afecta la variabilidad dimensional ($p=0.0023$). La velocidad de 16 in/min produce la mayor dispersión.</div>
+
+    <div id="chart-356-means" class="chart-container"></div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Este es un caso de <strong>efectos de dispersión</strong>: la velocidad de avance no afecta la media de la dimensión, sino su variabilidad. A 14 in/min se obtiene la menor dispersión (0.076), mientras que a 16 in/min la dispersión casi se duplica (0.156). Para optimizar la calidad dimensional, se recomienda la velocidad de 14 in/min. El aumento drástico a 16 in/min sugiere que el proceso se vuelve inestable a altas velocidades.</p>
+    </div>
+    `
+},
+{
+    id:"3.62", title:"Ejercicio 3.62", subtitle:"Telares textiles — Efectos aleatorios", topic:"Efectos aleatorios",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> 5 telares seleccionados al azar. Variable: producción (lb/min). 5 réplicas.</div>
+
+    <h4>Procedimiento completo</h4>
+
+    <h5>Inciso (a): ¿Por qué efectos aleatorios?</h5>
+    <p>Los telares fueron seleccionados <strong>al azar</strong> de una población grande de telares en la fábrica. Las conclusiones se generalizan a todos los telares, no solo a los 5 observados.</p>
+
+    <table class="data-table">
+        <tr><th>Telar</th><th>Obs 1</th><th>Obs 2</th><th>Obs 3</th><th>Obs 4</th><th>Obs 5</th><th>$\\bar{y}_{i\\cdot}$</th></tr>
+        <tr><td>T1</td><td>14.0</td><td>14.1</td><td>14.2</td><td>14.0</td><td>14.1</td><td class="highlight">14.08</td></tr>
+        <tr><td>T2</td><td>13.9</td><td>13.8</td><td>13.9</td><td>14.0</td><td>14.0</td><td class="highlight">13.92</td></tr>
+        <tr><td>T3</td><td>14.1</td><td>14.2</td><td>14.1</td><td>14.0</td><td>13.9</td><td class="highlight">14.06</td></tr>
+        <tr><td>T4</td><td>13.6</td><td>13.8</td><td>14.0</td><td>13.9</td><td>13.7</td><td class="highlight">13.80</td></tr>
+        <tr><td>T5</td><td>13.8</td><td>13.6</td><td>13.9</td><td>13.8</td><td>14.0</td><td class="highlight">13.82</td></tr>
+    </table>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Telar</td><td>4</td><td>0.342</td><td>0.0854</td><td class="highlight">5.77</td><td class="highlight">0.003</td></tr>
+        <tr><td>Error</td><td>20</td><td>0.296</td><td>0.0148</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>24</td><td>0.638</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <div class="decision-box reject">Se RECHAZA $H_0:\\sigma^2_\\tau=0$ ($p=0.003$). Hay variabilidad significativa entre telares.</div>
+
+    <h5>Componentes de varianza</h5>
+    <div class="formula-box">$$\\hat{\\sigma}^2 = 0.0148, \\quad \\hat{\\sigma}^2_\\tau = \\frac{0.0854-0.0148}{5} = 0.01412$$</div>
+
+    <h5>Inciso (d): IC 95% para $\\rho$</h5>
+    <div class="formula-box">$$\\hat{\\rho} = \\frac{\\hat{\\sigma}^2_\\tau}{\\hat{\\sigma}^2_\\tau+\\hat{\\sigma}^2} = \\frac{0.01412}{0.01412+0.0148} = 0.488$$</div>
+    <div class="formula-box">$$IC_{95\\%}(\\rho) \\approx [0.114,\\; 0.906]$$</div>
+
+    <div class="interpretation-box">
+        <div class="interp-title">📖 Interpretación</div>
+        <p>Aproximadamente el 48.8% de la variabilidad total en la producción se debe a diferencias entre telares. El IC amplio $[0.11, 0.91]$ refleja la incertidumbre con solo 5 telares. Aun así, la fábrica debería investigar qué causa las diferencias entre telares (mantenimiento, calibración, antigüedad) para reducir la variabilidad y mejorar la uniformidad de producción.</p>
+    </div>
+    `
+},
+{
+    id:"3.63-3.69", title:"Ejercicios 3.63–3.69", subtitle:"Verdadero / Falso", topic:"Conceptual",
+    content:`
+    <table class="data-table">
+        <tr><th>Ej.</th><th>Enunciado</th><th>R/</th><th>Justificación</th></tr>
+        <tr><td>3.63</td><td>Normalidad es extremadamente importante en ANOVA</td><td class="no">FALSO</td><td>ANOVA es robusto. Homocedasticidad es más crítica.</td></tr>
+        <tr><td>3.64</td><td>ANOVA trata factores cuantitativos y cualitativos igual</td><td class="yes">VERDADERO</td><td>Las fórmulas de SC no distinguen tipo. La diferencia está en la interpretación posterior.</td></tr>
+        <tr><td>3.65</td><td>Polinomio grado $a-1$ tiene misma SCE que ANOVA</td><td class="yes">VERDADERO</td><td>El polinomio pasa exactamente por las $a$ medias → mismos residuales.</td></tr>
+        <tr><td>3.66</td><td>Fisher LSD es extremadamente conservador</td><td class="no">FALSO</td><td>LSD es el MENOS conservador. Tukey y Scheffé son más conservadores.</td></tr>
+        <tr><td>3.67</td><td>REML usa verosimilitud, ANOVA usa momentos</td><td class="yes">VERDADERO</td><td>REML maximiza verosimilitud restringida; ANOVA iguala CM a valores esperados.</td></tr>
+        <tr><td>3.68</td><td>REML produce automáticamente IC para componentes</td><td class="yes">VERDADERO</td><td>REML construye IC basados en el perfil de verosimilitud.</td></tr>
+        <tr><td>3.69</td><td>Tukey compara todas las medias con un control</td><td class="no">FALSO</td><td>Tukey compara TODOS los pares. Dunnett compara con un control.</td></tr>
+    </table>
+    `
+},
+{
+    id:"3.70", title:"Ejercicio 3.70", subtitle:"Completar tabla ANOVA parcial", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> CMT=25.69, $F_0=3.65$, SCE=84.35, gl_Error=12, gl_Total=15.</div>
+
+    <h4>Procedimiento paso a paso</h4>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 1 — Grados de libertad y niveles</div>
+        <p>$gl_{Factor} = gl_{Total}-gl_{Error} = 15-12 = 3 \\Rightarrow a = 4$ niveles. $N = gl_{Total}+1=16 \\Rightarrow n=N/a=4$ réplicas.</p>
+    </div>
+
+    <div class="procedure-box">
+        <div class="proc-title">📐 Paso 2 — CME y SC del factor</div>
+        <div class="formula-box">$$CME = \\frac{SCE}{gl_E} = \\frac{84.35}{12} = 7.029$$</div>
+        <div class="formula-box">$$F_0 = \\frac{CMT}{CME} \\quad\\Rightarrow\\quad CME = \\frac{CMT}{F_0} = \\frac{25.69}{3.65} = 7.038 \\approx 7.03 \\quad \\checkmark$$</div>
+        <div class="formula-box">$$SC_{Factor} = CMT\\times gl_{Factor} = 25.69\\times 3 = 77.07$$</div>
+    </div>
+
+    <table class="data-table">
+        <tr><th>Fuente</th><th>gl</th><th>SC</th><th>CM</th><th>$F_0$</th><th>Valor-p</th></tr>
+        <tr><td>Factor</td><td class="highlight">3</td><td class="highlight">77.07</td><td>25.69</td><td>3.65</td><td class="highlight">0.044</td></tr>
+        <tr><td>Error</td><td>12</td><td>84.35</td><td class="highlight">7.029</td><td>—</td><td>—</td></tr>
+        <tr><td>Total</td><td>15</td><td>161.42</td><td>—</td><td>—</td><td>—</td></tr>
+    </table>
+
+    <p><strong>(b)</strong> $a=4$ niveles. <strong>(c)</strong> $n=4$ réplicas. <strong>(d)</strong> Cotas: $0.025<p<0.05$.</p>
+    <div class="decision-box reject">Se RECHAZA $H_0$ a $\\alpha=0.05$ (pero no a $\\alpha=0.025$). La evidencia es significativa pero no fuertemente significativa.</div>
+    `
+},
+{
+    id:"3.71", title:"Ejercicio 3.71", subtitle:"Estimación de la desviación estándar", topic:"ANOVA",
+    content:`
+    <div class="enunciado"><strong>Enunciado:</strong> La estimación de $\\sigma$ para una observación del Ej. 3.70 es: (a) 7.03 (b) 2.65 (c) 5.91 (d) 1.95</div>
+
+    <div class="formula-box">$$\\hat{\\sigma} = \\sqrt{CME} = \\sqrt{7.029} \\approx 2.651$$</div>
+
+    <div class="decision-box correct"><strong>Respuesta: (b) 2.65</strong>. La opción (a)=7.03 es el CME (varianza), no la desviación estándar. $\\hat{\\sigma}=\\sqrt{CME}$ mide la dispersión típica de una observación individual alrededor de la media de su grupo.</div>
+    `
+}
+];
+
+// ============================
+// NAVIGATION & INTERACTION
+// ============================
+let currentSection = 'demos';
+
+function initApp() {
+    setupTabs();
+    buildSidebar();
+    renderExercises('cap2', cap2Exercises, 'panel-cap2');
+    renderExercises('cap3', cap3Exercises, 'panel-cap3');
+    setTimeout(() => {
+        if (typeof renderMathInElement !== 'undefined') {
+            renderMathInElement(document.body, {
+                delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+                throwOnError: false
+            });
+        }
+    }, 300);
+}
+
+function setupTabs() {
+    document.querySelectorAll('.section-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            currentSection = tab.dataset.section;
+            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-'+currentSection).classList.add('active');
+            buildSidebar();
+        });
+    });
+}
+
+function buildSidebar() {
+    const sb = document.getElementById('sidebar');
+    let html = '';
+    if (currentSection === 'demos') {
+        html += '<div class="sidebar-group"><div class="sidebar-group-title">Demostraciones</div>';
+        html += '<button class="sidebar-item active" onclick="scrollToExercise(\'demo-1\',event)">1. τ̂ᵢ = ȳᵢ. − ȳ..</button>';
+        html += '<button class="sidebar-item" onclick="scrollToExercise(\'demo-2\',event)">2. σ̂² = (1/N)Σnᵢsᵢ²</button>';
+        html += '<button class="sidebar-item" onclick="scrollToExercise(\'demo-3\',event)">3. E[S²ᵧᵣ]</button>';
+        html += '</div>';
+    } else {
+        const exs = currentSection === 'cap2' ? cap2Exercises : cap3Exercises;
+        let lastTopic = '';
+        exs.forEach(ex => {
+            if (ex.topic !== lastTopic) {
+                if (lastTopic) html += '</div>';
+                html += '<div class="sidebar-group"><div class="sidebar-group-title">'+ex.topic+'</div>';
+                lastTopic = ex.topic;
+            }
+            html += '<button class="sidebar-item" onclick="scrollToExercise(\'ex-'+ex.id+'\',event)">'+ex.title+'</button>';
+        });
+        if (lastTopic) html += '</div>';
+    }
+    sb.innerHTML = html;
+}
+
+function renderExercises(prefix, exercises, panelId) {
+    const panel = document.getElementById(panelId);
+    let html = '';
+    exercises.forEach(ex => {
+        html += '<div class="exercise-card" id="ex-'+ex.id+'">';
+        html += '<div class="exercise-header" onclick="toggleCard(this)">';
+        html += '<div><h3>'+ex.title+'</h3><div class="subtitle">'+ex.subtitle+'</div></div>';
+        html += '<span class="toggle-arrow">▾</span></div>';
+        html += '<div class="exercise-body"><div class="exercise-content">'+ex.content+'</div></div></div>';
+    });
+    panel.innerHTML = html;
+}
+
+function toggleCard(header) {
+    const card = header.closest('.exercise-card');
+    card.classList.toggle('open');
+    if (card.classList.contains('open') && typeof renderMathInElement !== 'undefined') {
+        setTimeout(() => {
+            renderMathInElement(card, {
+                delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+                throwOnError: false
+            });
+            initChartsInCard(card);
+        }, 50);
+    }
+}
+
+function scrollToExercise(id, event) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (!el.classList.contains('open')) {
+        el.classList.add('open');
+        setTimeout(() => {
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(el, {
+                    delimiters: [{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+                    throwOnError: false
+                });
+            }
+            initChartsInCard(el);
+        }, 100);
+    }
+    el.scrollIntoView({behavior:'smooth',block:'start'});
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    if (event && event.target) event.target.classList.add('active');
+}
+
+window.addEventListener('scroll', () => {
+    document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 300);
+});
+
+// ============================
+// CHARTS — QQ Plots, Histograms, Bar Charts, Residual Plots
+// ============================
+let charts = {};
+
+function normalQuantile(p) {
+    // Rational approximation for normal quantile
+    if (p <= 0) return -4; if (p >= 1) return 4;
+    if (p < 0.5) return -normalQuantile(1-p);
+    const t = Math.sqrt(-2*Math.log(1-p));
+    const c0=2.515517, c1=0.802853, c2=0.010328;
+    const d1=1.432788, d2=0.189269, d3=0.001308;
+    return t - (c0+c1*t+c2*t*t)/(1+d1*t+d2*t*t+d3*t*t*t);
+}
+
+function makeQQ(data) {
+    const sorted = [...data].sort((a,b)=>a-b);
+    const n = sorted.length;
+    const mean = sorted.reduce((a,b)=>a+b,0)/n;
+    const std = Math.sqrt(sorted.reduce((a,b)=>a+(b-mean)**2,0)/(n-1));
+    const theoretical = [];
+    const observed = [];
+    for (let i=0;i<n;i++) {
+        theoretical.push(normalQuantile((i+0.5)/n));
+        observed.push((sorted[i]-mean)/std);
+    }
+    return {theoretical, observed};
+}
+
+function makeQQRaw(data) {
+    const sorted = [...data].sort((a,b)=>a-b);
+    const n = sorted.length;
+    const theoretical = [];
+    for (let i=0;i<n;i++) theoretical.push(normalQuantile((i+0.5)/n));
+    return {theoretical, observed: sorted};
+}
+
+function createChart(containerId, config) {
+    const container = document.getElementById(containerId);
+    if (!container || container.querySelector('canvas')) return;
+    const canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+    if (charts[containerId]) charts[containerId].destroy();
+    charts[containerId] = new Chart(canvas.getContext('2d'), config);
+}
+
+const blueColors = ['#1B2A4A','#2D4F8E','#4A85D6','#6FA0E3','#A3C4F0','#C4A77D'];
+const blueAlphas = ['rgba(27,42,74,0.7)','rgba(45,79,142,0.7)','rgba(74,133,214,0.7)','rgba(111,160,227,0.7)','rgba(163,196,240,0.7)','rgba(196,167,125,0.7)'];
+
+function initChartsInCard(card) {
+    const id = card.id;
+
+    // === Exercise 2.25: Histogram + QQ ===
+    if (id === 'ex-2.25') {
+        const rawData = [101,149,159,168,170,179,212,222,224,250,260,264,280,362,379,485];
+        // Histogram
+        const bins = [100,150,200,250,300,350,400,450,500];
+        const counts = new Array(bins.length-1).fill(0);
+        rawData.forEach(d => { for(let i=0;i<bins.length-1;i++) if(d>=bins[i]&&d<bins[i+1]){counts[i]++;break;} });
+        createChart('chart-225-hist', {
+            type:'bar',
+            data:{labels:bins.slice(0,-1).map((b,i)=>b+'–'+bins[i+1]),datasets:[{label:'Frecuencia',data:counts,backgroundColor:'rgba(45,79,142,0.6)',borderColor:'#2D4F8E',borderWidth:1}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Histograma — Tiempos de reparación (h)',font:{family:'DM Sans',size:12}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Frecuencia'}},x:{title:{display:true,text:'Horas'}}}}
+        });
+        // QQ
+        const qq = makeQQRaw(rawData);
+        const minT = Math.min(...qq.theoretical), maxT = Math.max(...qq.theoretical);
+        const mean225 = rawData.reduce((a,b)=>a+b,0)/rawData.length;
+        const std225 = Math.sqrt(rawData.reduce((a,b)=>a+(b-mean225)**2,0)/(rawData.length-1));
+        createChart('chart-225-qq', {
+            type:'scatter',
+            data:{datasets:[
+                {label:'Datos',data:qq.theoretical.map((t,i)=>({x:t,y:qq.observed[i]})),backgroundColor:'#2D4F8E',pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1},
+                {label:'Línea normal',data:[{x:minT,y:mean225+std225*minT},{x:maxT,y:mean225+std225*maxT}],type:'line',borderColor:'#C4A77D',borderDash:[5,5],pointRadius:0,borderWidth:2}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Q-Q Plot Normal',font:{family:'DM Sans',size:12}}},scales:{x:{title:{display:true,text:'Cuantiles teóricos N(0,1)'}},y:{title:{display:true,text:'Cuantiles observados (h)'}}}}
+        });
+    }
+
+    // === Exercise 3.11: Means + QQ + Residuals ===
+    if (id === 'ex-3.11') {
+        const data311 = [[3129,3000,2865,2890],[3200,3300,2975,3150],[2800,2900,2985,3050],[2600,2700,2600,2765]];
+        const means311 = data311.map(g=>g.reduce((a,b)=>a+b,0)/g.length);
+        // Means bar
+        createChart('chart-311-means',{
+            type:'bar',
+            data:{labels:['Técnica 1','Técnica 2','Técnica 3','Técnica 4'],datasets:[{label:'Media (lb/in²)',data:means311,backgroundColor:blueAlphas.slice(0,4),borderColor:blueColors.slice(0,4),borderWidth:2}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Comparación de medias por técnica',font:{family:'DM Sans',size:12}}},scales:{y:{beginAtZero:false,min:2500,title:{display:true,text:'Resistencia (lb/in²)'}}}}
+        });
+        // Residuals
+        const residuals311 = [];
+        const fitted311 = [];
+        data311.forEach((g,i) => g.forEach(v => { residuals311.push(v-means311[i]); fitted311.push(means311[i]); }));
+        // QQ of residuals
+        const qq311 = makeQQ(residuals311);
+        const minQ = Math.min(...qq311.theoretical), maxQ = Math.max(...qq311.theoretical);
+        createChart('chart-311-qq',{
+            type:'scatter',
+            data:{datasets:[
+                {label:'Residuales',data:qq311.theoretical.map((t,i)=>({x:t,y:qq311.observed[i]})),backgroundColor:'#2D4F8E',pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1},
+                {label:'Línea',data:[{x:minQ,y:minQ},{x:maxQ,y:maxQ}],type:'line',borderColor:'#C4A77D',borderDash:[5,5],pointRadius:0,borderWidth:2}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Q-Q Normal de Residuales',font:{family:'DM Sans',size:12}}},scales:{x:{title:{display:true,text:'Cuantiles teóricos'}},y:{title:{display:true,text:'Cuantiles observados (estandarizados)'}}}}
+        });
+        // Residuals vs fitted
+        createChart('chart-311-resid',{
+            type:'scatter',
+            data:{datasets:[{label:'Residuales',data:fitted311.map((f,i)=>({x:f,y:residuals311[i]})),backgroundColor:'#2D4F8E',pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Residuales vs. Valores Ajustados',font:{family:'DM Sans',size:12}}},scales:{x:{title:{display:true,text:'Valor ajustado (ȳᵢ.)'}},y:{title:{display:true,text:'Residual (eᵢⱼ)'}}}}
+        });
+    }
+
+    // === Exercise 3.20: Means + QQ ===
+    if (id === 'ex-3.20') {
+        createChart('chart-320-means',{
+            type:'bar',
+            data:{labels:['100°C','125°C','150°C','175°C'],datasets:[{label:'Densidad media',data:[21.74,21.50,21.72,21.70],backgroundColor:blueAlphas.slice(0,4),borderColor:blueColors.slice(0,4),borderWidth:2}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Densidad media por temperatura',font:{family:'DM Sans',size:12}}},scales:{y:{min:21.3,max:21.9,title:{display:true,text:'Densidad'}}}}
+        });
+        // QQ for residuals
+        const d320 = [[21.8,21.9,21.7,21.6,21.7],[21.7,21.4,21.5,21.4],[21.9,21.8,21.8,21.6,21.5],[21.9,21.7,21.8,21.4]];
+        const m320 = d320.map(g=>g.reduce((a,b)=>a+b,0)/g.length);
+        const r320 = []; d320.forEach((g,i)=>g.forEach(v=>r320.push(v-m320[i])));
+        const qq320 = makeQQ(r320);
+        const min320=Math.min(...qq320.theoretical),max320=Math.max(...qq320.theoretical);
+        createChart('chart-320-qq',{
+            type:'scatter',
+            data:{datasets:[
+                {label:'Residuales',data:qq320.theoretical.map((t,i)=>({x:t,y:qq320.observed[i]})),backgroundColor:'#2D4F8E',pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1},
+                {label:'Línea',data:[{x:min320,y:min320},{x:max320,y:max320}],type:'line',borderColor:'#C4A77D',borderDash:[5,5],pointRadius:0,borderWidth:2}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Q-Q Normal de Residuales',font:{family:'DM Sans',size:12}}},scales:{x:{title:{display:true,text:'Cuantiles teóricos'}},y:{title:{display:true,text:'Cuantiles observados'}}}}
+        });
+    }
+
+    // === Exercise 3.25: Trend + QQ ===
+    if (id === 'ex-3.25') {
+        createChart('chart-325-trend',{
+            type:'line',
+            data:{labels:['0.37','0.51','0.71','1.02','1.40','1.99'],datasets:[{label:'% Radón',data:[82.75,77,75,71.75,65,62.75],borderColor:'#2D4F8E',backgroundColor:'rgba(45,79,142,0.1)',fill:true,tension:0.3,pointBackgroundColor:'#C4A77D',pointRadius:6,pointBorderColor:'#fff',pointBorderWidth:2}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'% Radón liberado vs. Diámetro',font:{family:'DM Sans',size:12}}},scales:{y:{title:{display:true,text:'% Radón'}},x:{title:{display:true,text:'Diámetro orificio'}}}}
+        });
+        const d325 = [[80,83,83,85],[75,75,79,79],[74,73,76,77],[67,72,74,74],[62,62,67,69],[60,61,64,66]];
+        const m325 = d325.map(g=>g.reduce((a,b)=>a+b,0)/g.length);
+        const r325=[]; d325.forEach((g,i)=>g.forEach(v=>r325.push(v-m325[i])));
+        const qq325=makeQQ(r325);
+        const min325=Math.min(...qq325.theoretical),max325=Math.max(...qq325.theoretical);
+        createChart('chart-325-qq',{
+            type:'scatter',
+            data:{datasets:[
+                {label:'Residuales',data:qq325.theoretical.map((t,i)=>({x:t,y:qq325.observed[i]})),backgroundColor:'#2D4F8E',pointRadius:5,pointBorderColor:'#fff',pointBorderWidth:1},
+                {label:'Línea',data:[{x:min325,y:min325},{x:max325,y:max325}],type:'line',borderColor:'#C4A77D',borderDash:[5,5],pointRadius:0,borderWidth:2}
+            ]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Q-Q Normal de Residuales',font:{family:'DM Sans',size:12}}},scales:{x:{title:{display:true,text:'Cuantiles teóricos'}},y:{title:{display:true,text:'Cuantiles observados'}}}}
+        });
+    }
+
+    // === Exercise 3.56: Means bar ===
+    if (id === 'ex-3.56') {
+        createChart('chart-356-means',{
+            type:'bar',
+            data:{labels:['10 in/min','12 in/min','14 in/min','16 in/min'],datasets:[{label:'Desv. est. media',data:[0.094,0.092,0.076,0.156],backgroundColor:blueAlphas.slice(0,4),borderColor:blueColors.slice(0,4),borderWidth:2}]},
+            options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Desv. estándar media por velocidad de avance',font:{family:'DM Sans',size:12}}},scales:{y:{beginAtZero:true,title:{display:true,text:'Desv. Est. (×10⁻³ mm)'}}}}
+        });
+    }
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => { setTimeout(initApp, 100); });
+</script>
+</body>
+</html>
